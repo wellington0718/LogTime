@@ -1,0 +1,127 @@
+﻿<Window x:Class="UI.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        WindowStyle="None"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStartupLocation="CenterScreen"
+        KeyDown="HandleKeyPressed"
+        Icon="../Assets/icon.png"
+        mc:Ignorable="d"
+        Title="Login" Height="400" Width="350">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </Window.Resources>
+
+    <Grid>
+
+        <Border CornerRadius="8" Background="#FAFAFA" BorderThickness="5" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+
+                <Border Background="#333" CornerRadius="5 5 0 0" MouseDown="DragWindow">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="60"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" 
+                           Text="LOG IN" 
+                           Margin="10 2 0 0"
+                           Foreground="DarkGray" 
+                           FontSize="14" 
+                           FontFamily="Monserrat" 
+                           VerticalAlignment="Center"/>
+
+                        <Button Grid.Column="1" Margin="30 0 0 0"  BorderThickness="0" Background="{x:Null}" Padding="5 0 5 0" Click="BtnMinimize_Click">
+                            <materialDesign:PackIcon Kind="Minimize"/>
+                        </Button>
+                        <Button Grid.Column="2" Background="{x:Null}" BorderThickness="0" Padding="0" Margin="0 1 0 0" Width="22" Height="22" Click="BtnClose_Click">
+                            <Image Source="../Assets/logout.ico" Width="22"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0 15 0 0" >
+                    <Image Source="../Assets/icon.png" Height="55" />
+                    <TextBlock Text="LOGTIME" 
+                           FontFamily="Montserrat"
+                           Foreground="#333"
+                           FontWeight="Medium"
+                           FontSize="16"
+                           Margin="0 5 0 10"
+                           HorizontalAlignment="Center"/>
+                    
+                    <StackPanel>
+                       
+                        <TextBlock Text="{Binding ErrorMessage}" HorizontalAlignment="Center" Margin="15 0 0 5" Foreground="#B00020"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 0 0 15">
+                            <materialDesign:PackIcon Kind="User" VerticalAlignment="Center" />
+
+                            <TextBox Width="220" x:Name="UserIdBox"
+                             Style="{StaticResource MaterialDesignFilledTextBox}"
+                             Text="{Binding UserId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:TextFieldAssist.UnderlineBrush="#0065B1"
+                             materialDesign:HintAssist.Foreground="#0065B1"
+                             materialDesign:HintAssist.HintOpacity="1"
+                             materialDesign:HintAssist.Hint="Id">
+                            </TextBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Lock" VerticalAlignment="Center" />
+
+                            <PasswordBox materialDesign:HintAssist.Hint="Password" Width="220" 
+                                 materialDesign:PasswordBoxAssist.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.HintOpacity="1"
+                                 materialDesign:TextFieldAssist.HasClearButton="True"
+                                 Style="{StaticResource MaterialDesignFilledRevealPasswordBox}" />
+                        </StackPanel>
+
+                        <Button Command="{Binding LoginCommand}"
+                        materialDesign:ButtonAssist.CornerRadius="5" 
+                        Width="220" 
+                        Height="40"
+                        Background="#0065B1"
+                        HorizontalAlignment="Center"
+                        IsEnabled="true"
+                        Content="LOG IN"
+                        Margin="15 15 0 0">
+
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel x:Name="WorkingIndicator" Grid.Row="1" Margin="0 170 0 0" Visibility="Hidden">
+                    <TextBlock Text="Looking for open sessions Looking for open sessions Looking for open sessions Looking for open sessions" TextWrapping="Wrap" FontSize="13" HorizontalAlignment="Center"/>
+                    <ProgressBar Width="300"
+                          Height="10" Margin="0 10 0 0"
+                          IsIndeterminate="True"
+                          Orientation="Horizontal" />
+                </StackPanel>
+
+                <StatusBar Grid.Row="2" HorizontalAlignment="Left" Background="#FAFAFA" Margin="10 0 0 0">
+                    <StatusBarItem>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="../Assets/synergies_signature.png" Height="25"/>
+                        </StackPanel>
+                    </StatusBarItem>
+                </StatusBar>
+
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

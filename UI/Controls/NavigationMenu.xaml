@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="UI.Controls.NavigationMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <StackPanel Margin="0 0 0 0" Background="#333" VerticalAlignment="Center">
+        <Menu IsMainMenu="True">
+
+            <MenuItem Header="_Reportes" Foreground="#FFF" FontSize="14" Cursor="Hand">
+                <MenuItem Header="_Reporte de Tiempo de Logueo General" Foreground="#333"/>
+                <MenuItem Header="_UVC Reporte de Tiempo de Logueo" Foreground="#333"/>
+                <MenuItem Header="_Reporte de logueo de tiempo por estados" Foreground="#333"/>
+                <MenuItem Header="_Reporte de informe histórico del estado" Foreground="#333"/>
+                <MenuItem Header="_Mi sesión de actividad" Foreground="#333"/>
+                <MenuItem Header="_Reporte de logueo de tiempo por sesión" Foreground="#333"/>
+            </MenuItem>
+
+            <MenuItem Header="_Administración" Foreground="#FFF" FontSize="14" Cursor="Hand">
+                <MenuItem Header="_Estados" Foreground="#333"/>
+                <MenuItem Header="_Sesiones activas" Foreground="#333"/>
+                <MenuItem Header="_Grupos" Foreground="#333"/>
+            </MenuItem>
+            <MenuItem Header="_Ayuda" Foreground="#FFF" FontSize="14" Cursor="Hand"/>
+        </Menu>
+
+    </StackPanel>
+</UserControl>
