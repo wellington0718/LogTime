@@ -27,6 +27,6 @@
             </StackPanel>
             <Button FontSize="14" HorizontalAlignment="Stretch" Height="40" Content="Iniciar sesión" Command="{Binding LoginCommand}"/>
         </StackPanel>
-        <TextBlock HorizontalAlignment="Center" x:Name="CopyRightText" Margin="10,20,0,0" FontSize="14" FontWeight="SemiBold" />
+        <TextBlock HorizontalAlignment="Center" x:Name="CopyRightText" Margin="10,30,0,0" FontSize="14" FontWeight="SemiBold" />
     </StackPanel>
 </Window>
