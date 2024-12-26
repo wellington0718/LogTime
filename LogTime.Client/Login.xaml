@@ -11,7 +11,7 @@
         ResizeMode="CanMinimize"
         Topmost="True"
         WindowStartupLocation="CenterScreen"
-        Height="410" Width="450">
+        Height="420" Width="450">
 
     <StackPanel>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
