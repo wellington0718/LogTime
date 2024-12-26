@@ -1,0 +1,6 @@
+@LogTimeApi_HostAddress = http://localhost:5208
+
+GET {{LogTimeApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

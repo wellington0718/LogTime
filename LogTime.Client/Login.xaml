@@ -1,0 +1,32 @@
+﻿<Window x:Class="LogTime.Client.Login"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:customcontrols="clr-namespace:LogTime.Client.CustomControls"
+        mc:Ignorable="d"
+        ThemeMode="Dark"
+        Icon="Images/icon.png"
+        WindowStyle="SingleBorderWindow" 
+        ResizeMode="CanMinimize"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        Height="410" Width="450">
+
+    <StackPanel>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Image Source="Images/icon.png" Height="75" Margin="0, 0, 0, 0"/>
+            <TextBlock FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" Text="LOGTIME" />
+            <TextBlock FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Text="Aplicación de registro de tiempo" Margin="0,0,0,20"/>
+            <StackPanel>
+                <Label Content="Empleado Id" FontSize="14"/>
+                <TextBox FontSize="16" Margin="0,0,0,10" Text="{Binding UserId, Mode=OneWayToSource}"/>
+                <Label Content="Contraseña" FontSize="14"/>
+
+                <customcontrols:BindablePasswordBox Margin="0,0,0,10" Password="{Binding Password, Mode=OneWayToSource}"/>
+            </StackPanel>
+            <Button FontSize="14" HorizontalAlignment="Stretch" Height="40" Content="Iniciar sesión" Command="{Binding LoginCommand}"/>
+        </StackPanel>
+        <TextBlock HorizontalAlignment="Center" x:Name="CopyRightText" Margin="10,20,0,0" FontSize="14" FontWeight="SemiBold" />
+    </StackPanel>
+</Window>

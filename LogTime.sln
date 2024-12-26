@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogTime.Client", "LogTime.Client\LogTime.Client.csproj", "{63068A65-1A82-4B61-83E8-423F926B9B9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogTime.Api", "LogTime.Api\LogTime.Api.csproj", "{23F101AE-2A17-4030-8395-2D519306C3DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63068A65-1A82-4B61-83E8-423F926B9B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63068A65-1A82-4B61-83E8-423F926B9B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63068A65-1A82-4B61-83E8-423F926B9B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63068A65-1A82-4B61-83E8-423F926B9B9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23F101AE-2A17-4030-8395-2D519306C3DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23F101AE-2A17-4030-8395-2D519306C3DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23F101AE-2A17-4030-8395-2D519306C3DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23F101AE-2A17-4030-8395-2D519306C3DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
