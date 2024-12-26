@@ -4,6 +4,7 @@ using Domain.Models;
 using LogTime.Client.Contracts;
 using LogTime.Client.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Windows;
@@ -98,7 +99,7 @@ public partial class MainVM : ObservableObject
     }
 
     [RelayCommand]
-    public async Task CloseSession()
+    public async Task CloseSession(bool isShuttingDown)
     {
         var shownErrorMessage = "";
 
@@ -123,6 +124,8 @@ public partial class MainVM : ObservableObject
 
             await HandleCloseSession(logEntry);
 
+            if (!isShuttingDown)
+                RestartApp();
         }
         catch (Exception exception)
         {
@@ -139,6 +142,11 @@ public partial class MainVM : ObservableObject
             logService.Log(logEntry);
 
             MessageBox.Show(shownErrorMessage, "Error de conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+            RestartApp();
+        }
+        finally
+        {
+            loadingService.Close();
         }
     }
 
@@ -167,7 +175,6 @@ public partial class MainVM : ObservableObject
 
         logEntry.LogMessage = "Sesión cerrada.";
         logService.Log(logEntry);
-        RestartApp();
     }
 
     private bool HandleSessionAlreadyClosed(BaseResponse response, LogEntry logEntry)
@@ -250,7 +257,7 @@ public partial class MainVM : ObservableObject
         if (executablePath != null)
         {
             Process.Start(executablePath);
-            App.Current.Shutdown();
+            Application.Current.Shutdown();
         }
     }
 
