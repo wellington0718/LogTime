@@ -1,4 +1,6 @@
-﻿using LogTime.Client.ViewModels;
+﻿using Domain.Models;
+using LogTime.Client.Contracts;
+using LogTime.Client.ViewModels;
 using System.Windows;
 using System.Windows.Input;
 
@@ -7,16 +9,17 @@ namespace LogTime.Client;
 public partial class MainWindow : Window
 {
     private readonly MainVM _mainVM;
-    private bool _isShuttingDown = false;
+    private readonly ILogService _logService;
 
-    public MainWindow(MainVM mainVM)
+    public MainWindow(MainVM mainVM, ILogService logService)
     {
         InitializeComponent();
         Application.Current.ThemeMode = ThemeMode.Dark;
         CopyRightText.Text = $"SYNERGIES © {DateTime.Now.Year}";
         Title = GlobalData.AppNameVersion;
         _mainVM = mainVM;
-        this.Closing += OnWindowClosing;
+        _logService = logService;
+        Closing += OnWindowClosing;
         DataContext = _mainVM;
     }
 
@@ -30,24 +33,38 @@ public partial class MainWindow : Window
 
     private async void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (_isShuttingDown)
+        e.Cancel = true;
+        
+        if (_mainVM.IsShuttingDown || _mainVM.IsRestarting)
             return;
 
-        _isShuttingDown = true;
-
-        e.Cancel = true;
+        _mainVM.IsShuttingDown = true;
 
         try
         {
-            await _mainVM.CloseSession(_isShuttingDown);
-            Application.Current.Shutdown();
+            await _mainVM.CloseSession();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            MessageBox.Show($"An error occurred while closing: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            var logEntry = new LogEntry
+            {
+                ClassName = nameof(MainWindow),
+                MethodName = nameof(OnWindowClosing),
+                UserId = GlobalData.SessionData.User?.Id,
+                LogMessage = exception.GetBaseException().Message
+            };
 
-            _isShuttingDown = false;
-            e.Cancel = false;
+            _logService.Log(logEntry);
+
+            MessageBox.Show(
+                $"({DateTime.Now}) Un error desconocido ocurrió al intentar cerrar la sesión.",
+                "Error de sesión",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+
+            _mainVM.RestartApp();
         }
     }
+
 }

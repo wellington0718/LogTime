@@ -71,9 +71,9 @@ public class LogTimeApiClient : ILogTimeApiClient
         return await SendAsync<FetchSessionData>("Session/Fetch", userId);
     }
 
-    public async Task<StatusHistory> ChangeActivity(StatusChange statusChange)
+    public async Task<StatusHistoryChange> ChangeActivityAsync(StatusHistoryChange statusChange)
     {
-        return await SendAsync<StatusHistory>("Status/Change", statusChange);
+        return await SendAsync<StatusHistoryChange>("Status/Change", statusChange);
     }
 
     public async Task<BaseResponse> IsUserNotAllowedToLoginAsync(string userId)

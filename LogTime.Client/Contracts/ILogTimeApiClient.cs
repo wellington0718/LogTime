@@ -9,7 +9,7 @@ public interface ILogTimeApiClient
     Task<BaseResponse> CloseSessionAsync(SessionLogOutData sessionLogOutData);
     Task<SessionAliveDate> UpdateSessionAliveDateAsync(int logHistoryId);
     Task<FetchSessionData> FetchSessionAsync(string userId);
-    Task<StatusHistory> ChangeActivity(StatusChange statusChange);
+    Task<StatusHistoryChange> ChangeActivityAsync(StatusHistoryChange statusChange);
     Task<BaseResponse> IsUserNotAllowedToLoginAsync(string userId);
 
 }

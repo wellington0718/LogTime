@@ -51,7 +51,7 @@ public class ActiveLogRepository(LogTimeDataContext dataContext, IUserRepository
         {
             User = user,
             LogHistory = createdLogHistory,
-            LoginTime = startDate,
+            ActiveLog = activeLog,
         };
 
         return newSessionData;

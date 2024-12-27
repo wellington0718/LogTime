@@ -7,11 +7,11 @@ namespace LogTime.Api.Controllers
     public class StatusController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult> Change(StatusChange statusChange)
+        public async Task<ActionResult> Change(StatusHistoryChange statusChange)
         {
             try
             {
-                var currentStatusHistory = await logTimeUnitOfWork.StatusHistoryRepository.FindAsync(statusChange.CurrentStatusHistoryId);
+                var currentStatusHistory = await logTimeUnitOfWork.StatusHistoryRepository.FindAsync(statusChange.Id);
                 var currentActiveLog = await logTimeUnitOfWork.ActiveLogRepository.FindAsync(activeLog => activeLog.ActualStatusHistoryId == currentStatusHistory.Id);
 
                 if (currentActiveLog == null)
@@ -19,7 +19,7 @@ namespace LogTime.Api.Controllers
                     return CreateResponse(new BaseResponse
                     {
                         Code = StatusCodes.Status200OK,
-                        Title = "Ok",
+                        Title = nameof(StatusMessage.Ok),
                         IsSessionAlreadyClose = true
                     });
                 }
@@ -35,7 +35,7 @@ namespace LogTime.Api.Controllers
                     return CreateResponse(new BaseResponse
                     {
                         Code = StatusCodes.Status200OK,
-                        Title = "Ok",
+                        Title = nameof(StatusMessage.Ok),
                         IsSessionAlreadyClose = true
                     });
                 }
@@ -63,7 +63,17 @@ namespace LogTime.Api.Controllers
                 await logTimeUnitOfWork.SaveChangesAsync();
                 await logTimeUnitOfWork.CommitAsync();
 
-                return CreateResponse(createdStatusHistory);
+                var newStatusHistoryChange = new StatusHistoryChange
+                {
+                    Id = createdStatusHistory.Id,
+                    StartTime = currentDateTime,
+                    HasError = false,
+                    IsSessionAlreadyClose = false,
+                    Code = StatusCodes.Status200OK,
+                    Title = nameof(StatusMessage.Ok),
+                };
+
+                return CreateResponse(newStatusHistoryChange);
             }
             catch (Exception exception)
             {
