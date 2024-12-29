@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogTime.Client", "LogTime.Client\LogTime.Client.csproj", "{63068A65-1A82-4B61-83E8-423F926B9B9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogTime", "LogTime\LogTime.csproj", "{63068A65-1A82-4B61-83E8-423F926B9B9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{5371F57B-9F40-48C5-B0D0-E158C76CE0D5}"
 EndProject

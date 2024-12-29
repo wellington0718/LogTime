@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+
+	<String Id="SimpleUIWelcomeDlgTitle" Overridable="yes">{\WixUI_Font_Title}[ProductName] Installer</String>
+	<String Id="SimpleUIWelcomeDlgInstall" Overridable="yes">Agree &amp;&amp; &amp;Install</String>
+	<String Id="SimpleUIWelcomeDlgFolderLabel" Overridable="yes">Install to:</String>
+
+	<String Id="SimpleUIMaintenanceTypeDlgTitle" Overridable="yes">{\WixUI_Font_Title}Repair or remove the installation</String>
+	<String Id="SimpleUIMaintenanceTypeDlgRemoveButtonTooltip" Overridable="yes">Remove the software from your computer.</String>
+	<String Id="SimpleUIMaintenanceTypeDlgRepairButtonTooltip" Overridable="yes">Fix errors in the installation.</String>
+
+	<String Id="SimpleUIExitDialogInstallTitle" Overridable="yes">{\WixUI_Font_Bigger}Done installing</String>
+	<String Id="SimpleUIExitDialogReomveTitle" Overridable="yes">{\WixUI_Font_Bigger}Done uninstalling</String>
+	<String Id="SimpleUIExitDialogRepairTitle" Overridable="yes">{\WixUI_Font_Bigger}Done repairing</String>
+	<String Id="SimpleUIExitDialogDescription" Overridable="yes"></String>
+
+</WixLocalization>
