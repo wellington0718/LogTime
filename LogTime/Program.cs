@@ -1,6 +1,5 @@
-﻿//using Squirrel;
+﻿using Squirrel;
 using System.Windows;
-using Velopack;
 
 namespace LogTime;
 
@@ -11,12 +10,7 @@ static class Program
     {
         try
         {
-            // SquirrelAwareApp.HandleEvents(
-            //onInitialInstall: OnAppInstall,
-            //onAppUninstall: OnAppUninstall,
-            //onEveryRun: OnAppRun);
-
-            VelopackApp.Build().Run();
+            SquirrelAwareApp.HandleEvents(onInitialInstall: OnAppInstall, onAppUninstall: OnAppUninstall, onEveryRun: OnAppRun);
 
             var app = new App();
             app.InitializeComponent();
@@ -28,20 +22,20 @@ static class Program
         }
     }
 
-    //private static void OnAppInstall(SemanticVersion version, IAppTools tools)
-    //{
-    //    tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
-    //}
+    private static void OnAppInstall(SemanticVersion version, IAppTools tools)
+    {
+        tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
+    }
 
-    //private static void OnAppUninstall(SemanticVersion version, IAppTools tools)
-    //{
-    //    tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
-    //}
+    private static void OnAppUninstall(SemanticVersion version, IAppTools tools)
+    {
+        tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
+    }
 
-    //private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
-    //{
-    //    tools.SetProcessAppUserModelId();
-    //    // show a welcome message when the app is first installed
-    //    if (firstRun) MessageBox.Show("Thanks for installing my application!");
-    //}
+    private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
+    {
+        tools.SetProcessAppUserModelId();
+        // show a welcome message when the app is first installed
+        if (firstRun) MessageBox.Show("Thanks for installing LogTime!");
+    }
 }

@@ -10,19 +10,19 @@
         ResizeMode="CanMinimize"
         Topmost="True"
         WindowStartupLocation="CenterScreen"
-        Height="320" Width="500">
+        Height="320" Width="530">
 
     <StackPanel>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Background="#323232">
-            <Menu>
+            <Menu FontSize="13">
                 <MenuItem Header="Cerrar sessión" Command="{Binding CloseSessionCommand}"/>
             </Menu>
 
-            <Menu>
+            <Menu FontSize="13">
                 <MenuItem Header="Reportes" />
             </Menu>
 
-            <Menu>
+            <Menu FontSize="13">
                 <MenuItem Header="Administración">
                     <MenuItem Header="New" />
                     <MenuItem Header="New window" />
@@ -33,11 +33,11 @@
                     <MenuItem Header="Exit" />
                 </MenuItem>
             </Menu>
-            <Menu>
+            <Menu FontSize="13">
                 <MenuItem Header="Logs" />
             </Menu>
 
-            <Menu>
+            <Menu FontSize="13">
                 <MenuItem Header="Ayuda" />
             </Menu>
 
@@ -76,16 +76,16 @@
             <StackPanel HorizontalAlignment="Center" Margin="0">
 
                 <StackPanel Orientation="Horizontal">
-                    <Border Background="#323232" CornerRadius="8" Padding="26, 10">
+                    <Border Background="#323232" CornerRadius="8" Padding="28, 10">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="Inicio de sesión" HorizontalAlignment="Center"/>
+                            <Label FontSize="14" FontWeight="SemiBold" Content="Inicio de sesión" HorizontalAlignment="Center"/>
                             <TextBlock HorizontalAlignment="Center" Text="{Binding LoginDate}" FontWeight="UltraLight"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="12, 10">
+                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="19, 10">
                         <StackPanel HorizontalAlignment="Center">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="Conexión servidor" HorizontalAlignment="Center"/>
+                            <Label FontSize="14" FontWeight="SemiBold" Content="Conexión servidor" HorizontalAlignment="Center"/>
                             <TextBlock HorizontalAlignment="Center" Text="{Binding ServerConnection}" FontWeight="UltraLight"/>
                         </StackPanel>
                     </Border>
@@ -93,17 +93,17 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 15">
-                    <Border Background="#323232" CornerRadius="8" Padding="10, 10">
+                    <Border Background="#323232" CornerRadius="8" Padding="12, 10">
                         <StackPanel HorizontalAlignment="Center">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="Tiempo de actividad" HorizontalAlignment="Center"/>
+                            <Label FontSize="14" FontWeight="SemiBold" Content="Tiempo de actividad" HorizontalAlignment="Center"/>
                             <TextBlock Text="{Binding ActivityTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="25, 10">
+                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="22, 10">
                         <StackPanel HorizontalAlignment="Center">
-                            <Label FontWeight="SemiBold" Content="Tiempo de sesión" HorizontalAlignment="Center"/>
-                            <TextBlock FontSize="15" Text="{Binding SessionTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
+                            <Label FontSize="14" FontWeight="SemiBold" Content="Tiempo de sesión" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding SessionTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -115,17 +115,7 @@
                         <Label Margin="0, 6, 10, 0" FontWeight="SemiBold" Content="Actividad:" FontSize="16"/>
 
                         <ComboBox Width="200" Background="#323232" SelectedIndex="{Binding CurrentStatusIndex, UpdateSourceTrigger=LostFocus}"
-                                  ItemsSource="{Binding SessionData.User.Project.Statuses}" 
-                                  DisplayMemberPath="Description">
-
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="DropDownClosed">
-                                    <i:InvokeCommandAction Command="{Binding ChangeActivityCommand}" 
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=SelectedIndex}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-
-                        </ComboBox>
+                                  ItemsSource="{Binding SessionData.User.Project.Statuses}" DisplayMemberPath="Description" DropDownClosed="ChangeActivity"/>
 
                     </StackPanel>
                 </Border>

@@ -1,7 +1,5 @@
 ﻿using LogTime.ViewModels;
 using System.Windows;
-//using Velopack;
-
 namespace LogTime;
 
 public partial class Login : Window

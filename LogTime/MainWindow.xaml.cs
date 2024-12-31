@@ -1,7 +1,12 @@
 ﻿using Domain.Models;
 using LogTime.Contracts;
+using LogTime.Services;
+using LogTime.Utils;
 using LogTime.ViewModels;
+using Squirrel;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace LogTime;
@@ -10,8 +15,10 @@ public partial class MainWindow : Window
 {
     private readonly MainVM _mainVM;
     private readonly ILogService _logService;
+    private readonly FtpService _ftpService;
+    private readonly string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-    public MainWindow(MainVM mainVM, ILogService logService)
+    public MainWindow(MainVM mainVM, ILogService logService, FtpService ftpService)
     {
         InitializeComponent();
         Application.Current.ThemeMode = ThemeMode.Dark;
@@ -19,8 +26,11 @@ public partial class MainWindow : Window
         Title = GlobalData.AppNameVersion;
         _mainVM = mainVM;
         _logService = logService;
+        _ftpService = ftpService;
         Closing += OnWindowClosing;
         DataContext = _mainVM;
+
+        UpdateApp();
     }
 
     private void OpenFlyout(object sender, MouseButtonEventArgs e)
@@ -65,19 +75,48 @@ public partial class MainWindow : Window
 
             _mainVM.RestartApp();
         }
-        //finally
-        //{
-        //    var mgr = new UpdateManager("C:\\Users\\Synergies\\source\\LogTime\\LogTime\\Releases");
-
-        //    // check for new version
-        //    var newVersion = await mgr.CheckForUpdatesAsync();
-
-        //    if (newVersion != null && _mainVM.IsShuttingDown)
-        //    {
-        //        await mgr.DownloadUpdatesAsync(newVersion);
-        //        mgr.ApplyUpdatesAndRestart(newVersion);
-        //    }
-        //}
     }
 
+    private async void UpdateApp()
+    {
+        try
+        {
+            var appUpdatesLocalFolderPath = $"{localApplicationData}/{Constants.AppLocalUpdatesFolderPath}";
+            await _ftpService.DownloadFiles(Constants.AppReleases);
+
+            using var mgr = new UpdateManager(appUpdatesLocalFolderPath);
+
+            if (mgr.IsInstalledApp)
+            {
+                var updateAppInfo = await mgr.CheckForUpdate();
+
+                if (updateAppInfo.ReleasesToApply.Count != 0)
+                {
+                    await _ftpService.DownloadFiles(Constants.NUPKG);
+                    var update = await mgr.UpdateApp();
+
+                    var newVersion = $"{update.Version.Major}.{update.Version.Minor}";
+                    Directory.Delete(appUpdatesLocalFolderPath, true);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var newVersionMessage = $"¡Una nueva versión de LogTime ({newVersion}) está disponible! Los cambios se aplicarán cuando reinicies la aplicación.";
+                        MessageBox.Show(newVersionMessage, "LogTime - Actualización Disponible", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show(ex.Message, "LogTime - Error de actualización", MessageBoxButton.OK, MessageBoxImage.Error);
+            });
+        }
+    }
+
+    private async void ChangeActivity(object sender, EventArgs e)
+    {
+        await _mainVM.ChangeActivity();
+    }
 }

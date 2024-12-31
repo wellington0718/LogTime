@@ -2,10 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using Domain.Models;
 using LogTime.Contracts;
-using LogTime.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -13,18 +11,18 @@ namespace LogTime.ViewModels;
 
 public partial class MainVM : ObservableObject
 {
-    private readonly DispatcherTimer sessionTimer;
-    private readonly DispatcherTimer activityTimer;
+    private readonly DispatcherTimer sessionTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly DispatcherTimer activityTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
-    private TimeSpan sessionTimeSpan;
-    private TimeSpan activityTimeSpan;
+    private TimeSpan sessionTimeSpan = new();
+    private TimeSpan activityTimeSpan = new();
 
     [ObservableProperty]
-    private string sessionTime;
+    private string sessionTime = "00:00:00";
     [ObservableProperty]
-    private string activityTime;
+    private string activityTime = "00:00:00";
     [ObservableProperty]
     private string serverConnection;
     [ObservableProperty]
@@ -34,7 +32,7 @@ public partial class MainVM : ObservableObject
 
     private int _previousStatusId;
     private readonly LogEntry logEntry;
-    const int MinimumBreakDurationMinutes = 2;
+    private const int MinimumBreakDurationMinutes = 2;
 
     public SessionData SessionData { get; }
     public bool IsShuttingDown { get; set; }
@@ -44,123 +42,90 @@ public partial class MainVM : ObservableObject
     {
         var app = (App)Application.Current;
         SessionData = GlobalData.SessionData;
-        ServerConnection = GlobalData.SessionData.LogHistory.LoginDate.ToString("yyyy-MM-dd HH:mm:ss");
-        LoginDate = GlobalData.SessionData.LogHistory.LoginDate.ToString("yyyy-MM-dd HH:mm:ss");
-        CurrentStatusIndex = (int)SharedStatus.NoActivity;
-        _previousStatusId = CurrentStatusIndex;
-        sessionTimer = new();
-        activityTimer = new();
-        sessionTimeSpan = new();
-        activityTimeSpan = new();
+        var loginDateTime = GlobalData.SessionData.LogHistory.LoginDate;
+        serverConnection = loginDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        loginDate = serverConnection;
+        currentStatusIndex = (int)SharedStatus.NoActivity;
+        _previousStatusId = currentStatusIndex;
 
-        sessionTime = "00:00:00";
-        activityTime = "00:00:00";
-
-        sessionTimer.Interval = TimeSpan.FromSeconds(1);
-        activityTimer.Interval = TimeSpan.FromSeconds(1);
-        sessionTimer.Tick += SessionTimerTick;
-        activityTimer.Tick += ActivityTimerTick;
+        sessionTimer.Tick += (s, e) => UpdateTimer(ref sessionTimeSpan, nameof(SessionTime));
+        activityTimer.Tick += (s, e) => UpdateTimer(ref activityTimeSpan, nameof(ActivityTime));
         sessionTimer.Start();
         activityTimer.Start();
+
         logService = app.ServiceProvider.GetRequiredService<ILogService>();
         logTimeApiClient = app.ServiceProvider.GetRequiredService<ILogTimeApiClient>();
         loadingService = app.ServiceProvider.GetRequiredService<ILoadingService>();
         logEntry = new LogEntry
         {
-            ClassName = nameof(LoginVM),
-            UserId = GlobalData.SessionData.User?.Id,
+            ClassName = nameof(MainVM),
+            UserId = SessionData.User?.Id,
         };
     }
 
-    [RelayCommand]
-    public async Task ChangeActivity(object parameter)
+   
+    public async Task ChangeActivity()
     {
         try
         {
-            var selectedStatusIndex = (int)parameter;
-
-            if (IsEarlyBreakChange())
+            if (IsEarlyBreakChange() && !ShowBreakWarning())
             {
-                if (ShowBreakWarning())
-                {
-                    await UpdateStatus(selectedStatusIndex);
-                }
-                else
-                {
-                    RevertToPreviousStatus();
-                }
+                RevertToPreviousStatus();
+                return;
             }
-            else if (CurrentStatusIndex == (int)SharedStatus.Lunch)
+
+            if (CurrentStatusIndex == (int)SharedStatus.Lunch)
             {
-                await UpdateStatus(selectedStatusIndex);
-                IsShuttingDown = true;
                 await CloseSession();
             }
             else
             {
-                await UpdateStatus(selectedStatusIndex);
+                await UpdateStatus(CurrentStatusIndex);
             }
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            logEntry.LogMessage = exception.GetBaseException().Message;
-            logEntry.MethodName = nameof(CloseSession);
-            logService.Log(logEntry);
-            var showMessge = $"({DateTime.Now}) Un error desconocido ocurrió al intentar cerrar la sesión.";
-            var result = MessageBox.Show(showMessge, "LogTime - Error de conexión", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            HandleException(ex, nameof(ChangeActivity), "Ocurrió un error al intentar cambiar la actividad.");
         }
     }
 
     [RelayCommand]
     public async Task CloseSession()
     {
-        var shownErrorMessage = "";
-
         try
         {
-            var action = IsShuttingDown ? "salir de la aplicación" : "reiniciar la aplicación";
-            var promptMessage = $"¿Seguro que deseas cerrar la sesión y {action}?";
+            var closeSessionConfirmation = ConfirmCloseSession();
+            var isLunchStatusIndex = CurrentStatusIndex == (int)SharedStatus.Lunch;
 
-            logEntry.LogMessage = $"El usuario hizo click en cerrar la sesión y {action}.";
-            logEntry.MethodName = nameof(CloseSession);
-            logService.Log(logEntry);
-
-            var result = MessageBox.Show(promptMessage, "LogTime - Confirmación", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
+            if (!closeSessionConfirmation && isLunchStatusIndex)
             {
-                logEntry.LogMessage = $"El usuario decidió cancelar el cierre de sesión.";
-                logService.Log(logEntry);
-                IsShuttingDown = false;
+                RevertToPreviousStatus();
+                return;
+            }
+            else if(!closeSessionConfirmation)
+            {
                 return;
             }
 
-            await HandleCloseSession();
-
-            if (!IsShuttingDown)
+            if (isLunchStatusIndex)
             {
-                RestartApp();
+                await UpdateStatus(CurrentStatusIndex);
+                IsShuttingDown = true;
             }
-            else
+
+            await HandleCloseSession();
+            if (IsShuttingDown)
             {
                 Application.Current.Shutdown();
             }
-        }
-        catch (Exception exception)
-        {
-            if (exception is HttpRequestException)
-            {
-                shownErrorMessage = $"({DateTime.Now}) No se puedo conectar con el servidor.";
-            }
             else
             {
-                shownErrorMessage = $"({DateTime.Now}) Un error desconocido ocurrió al intentar cerrar la sesión.";
+                RestartApp();
             }
-
-            logEntry.LogMessage = exception.GetBaseException().Message;
-            logService.Log(logEntry);
-
-            MessageBox.Show(shownErrorMessage, "Error de conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex, nameof(CloseSession), "Un error ocurrió al intentar cerrar la sesión.");
             RestartApp();
         }
         finally
@@ -169,139 +134,21 @@ public partial class MainVM : ObservableObject
         }
     }
 
-    private async Task HandleCloseSession()
+    private void UpdateTimer(ref TimeSpan timeSpan, string propertyName)
     {
-        loadingService.Show("Cerrando sesión, por favor espere...");
-        logEntry.LogMessage = "Cerrando sesión.";
-        logService.Log(logEntry);
+        timeSpan = timeSpan.Add(TimeSpan.FromSeconds(1));
+        var timeString = timeSpan.ToString(@"hh\:mm\:ss");
 
-        var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(GlobalData.SessionData.LogHistory.Id);
-
-        if (HandleSessionAlreadyClosed(updateSessionAliveDateResponse))
-            return;
-
-        if (HandleErrorResponse(updateSessionAliveDateResponse))
-            return;
-
-        var userId = GlobalData.SessionData.User.Id;
-        var sessionLogOutData = new SessionLogOutData
+        switch (propertyName)
         {
-            UserIds = userId,
-            LoggedOutBy = CurrentStatusIndex == (int)SharedStatus.Lunch ? "Auto-logout: Lunch" : userId
-        };
-
-        var closeSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
-
-        if (HandleSessionAlreadyClosed(closeSessionResponse))
-            return;
-
-        if (HandleErrorResponse(closeSessionResponse))
-            return;
-
-        logEntry.LogMessage = "Sesión cerrada.";
-        logService.Log(logEntry);
-    }
-
-    private bool HandleSessionAlreadyClosed(BaseResponse response)
-    {
-        if (response.IsSessionAlreadyClose)
-        {
-            logEntry.LogMessage = "La sesión ya había sido cerrada por alguien más o por un servicio.";
-            logService.Log(logEntry);
-            MessageBox.Show(logEntry.LogMessage, "Sesión cerrada", MessageBoxButton.OK, MessageBoxImage.Information);
-            RestartApp();
-            return true;
+            case nameof(SessionTime):
+                SessionTime = timeString; 
+                break;
+            case nameof(ActivityTime):
+                ActivityTime = timeString; 
+                break;
         }
-        return false;
-    }
-
-    private bool HandleErrorResponse(BaseResponse response)
-    {
-        if (response.HasError)
-        {
-            logEntry.LogMessage = response.Message;
-            logEntry.MethodName = nameof(HandleErrorResponse);
-            logService.Log(logEntry);
-            string shownErrorMessage = $"({DateTime.Now}) Comunícate con el soporte técnico para recibir asistencia con este error.";
-            var dialogResult = MessageBox.Show(
-                $"{shownErrorMessage}{Environment.NewLine}{Environment.NewLine}" +
-                "Puedes seleccionar (Yes) para intentar cerrar la sesión nuevamente o (No) para reiniciar la aplicación. " +
-                "Tenga en cuenta que, al reiniciar, la sesión se asociará con la hora actual y será necesario iniciar sesión nuevamente para liberarla.",
-                "LogTime - Error de sesión",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Error);
-
-            if (dialogResult == MessageBoxResult.No)
-            {
-                return HandleRestartApplication(logEntry);
-            }
-            else
-            {
-                logEntry.LogMessage = "El usuario aceptó la opción de regresar para reintentar cerrar sesión.";
-                logService.Log(logEntry);
-                Application.Current.MainWindow.Activate();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private bool HandleRestartApplication(LogEntry logEntry)
-    {
-        logEntry.LogMessage = "Tras el error, el usuario rechazó reintentar y decidió reiniciar la aplicación.";
-        logEntry.MethodName = nameof(HandleRestartApplication);
-        logService.Log(logEntry);
-
-        var restartDialogResult = MessageBox.Show(
-            $"Has decidido reiniciar la aplicación. Esta acción dejará la sesión enganchada hasta que vuelvas a iniciar sesión o " +
-            $"alguien más la cierre. Del modo que sea, la sesión se guardará con fecha de cierre: {ServerConnection}" +
-            $"{Environment.NewLine}¿Deseas continuar?",
-            "LogTime - Continuar reiniciando",
-            MessageBoxButton.OKCancel,
-            MessageBoxImage.Information);
-
-        if (restartDialogResult == MessageBoxResult.Yes)
-        {
-            logEntry.LogMessage = "El usuario aceptó reiniciar la aplicación.";
-            logService.Log(logEntry);
-            RestartApp();
-            return true;
-        }
-        else
-        {
-            logEntry.LogMessage = "El usuario rechazó reiniciar la aplicación.";
-            logService.Log(logEntry);
-            Application.Current.MainWindow.Activate();
-            return true;
-        }
-    }
-
-    public void RestartApp()
-    {
-        string? executablePath = Environment.ProcessPath;
-        IsRestarting = true;
-        IsShuttingDown = false;
-
-        if (executablePath != null)
-        {
-            Process.Start(executablePath);
-            Application.Current.Shutdown();
-        }
-    }
-
-    private bool IsEarlyBreakChange()
-    {
-        return (_previousStatusId == (int)SharedStatus.Break && activityTimeSpan.Minutes < MinimumBreakDurationMinutes)
-               && CurrentStatusIndex != (int)SharedStatus.Break;
-    }
-
-    private static bool ShowBreakWarning()
-    {
-        var result = MessageBox.Show(Resources.EARLY_BREAK_CHANGE, Resources.EARLY_BREAK_TITLE, MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        return result == MessageBoxResult.Yes;
-    }
-
-    private void ResetActivityTime() => activityTimeSpan = TimeSpan.Zero;
+    } 
 
     private async Task UpdateStatus(int newStatusIndex)
     {
@@ -319,7 +166,7 @@ public partial class MainVM : ObservableObject
             logEntry.MethodName = nameof(UpdateStatus);
 
             logService.Log(logEntry);
-            ResetActivityTime();
+            ResetActivityTimer();
 
             var statusChange = new StatusHistoryChange
             {
@@ -330,10 +177,10 @@ public partial class MainVM : ObservableObject
             var statusHistoryChangeResponse = await logTimeApiClient.ChangeActivityAsync(statusChange);
             SessionData.ActiveLog.ActualStatusHistoryId = statusHistoryChangeResponse.Id;
 
-            if (HandleSessionAlreadyClosed(statusHistoryChangeResponse))
+            if (HandleResponseErrors(statusHistoryChangeResponse))
                 return;
 
-            if (HandleErrorResponse(statusHistoryChangeResponse))
+            if (HandleResponseErrors(statusHistoryChangeResponse))
                 return;
 
             ServerConnection = statusHistoryChangeResponse.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
@@ -345,17 +192,85 @@ public partial class MainVM : ObservableObject
         }
     }
 
+    private async Task HandleCloseSession()
+    {
+        loadingService.Show("Cerrando sesión, por favor espere...");
+        logService.Log(new LogEntry { LogMessage = "Cerrando sesión.", ClassName = nameof(MainVM) });
+
+        var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.LogHistory.Id);
+        if (HandleResponseErrors(updateSessionAliveDateResponse)) return;
+
+        var sessionLogOutData = new SessionLogOutData
+        {
+            UserIds = SessionData.User.Id,
+            LoggedOutBy = CurrentStatusIndex == (int)SharedStatus.Lunch ? "Auto-logout: Lunch" : SessionData.User.Id
+        };
+
+        var closeSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
+        if (HandleResponseErrors(closeSessionResponse)) return;
+
+        logService.Log(new LogEntry { LogMessage = "Sesión cerrada.", ClassName = nameof(MainVM) });
+    }
+
+    private bool HandleResponseErrors(BaseResponse response)
+    {
+        if (response.IsSessionAlreadyClose)
+        {
+            ShowInfo("La sesión ya había sido cerrada por alguien más o por un servicio.");
+            RestartApp();
+            return true;
+        }
+
+        if (response.HasError)
+        {
+            var retry = ShowError("Ocurrió un error. Puedes intentar cerrar sesión nuevamente o reiniciar la aplicación.");
+            if (!retry) RestartApp();
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ConfirmCloseSession()
+    {
+        var action = IsShuttingDown ? "salir de la aplicación" : "reiniciar la aplicación";
+        var prompt = CurrentStatusIndex != (int)SharedStatus.Lunch
+            ? $"¿Seguro que deseas cerrar la sesión y {action}?"
+            : "El estado de Lunch terminará la sesión y cerrará la aplicación. ¿Seguro que deseas continuar?";
+
+        return ShowConfirmation(prompt);
+    }
+
+    private void HandleException(Exception ex, string methodName, string errorMessage)
+    {
+        logService.Log(new LogEntry { LogMessage = ex.GetBaseException().Message, MethodName = methodName });
+        ShowError(errorMessage);
+    }
+
+    private static bool ShowBreakWarning() => ShowConfirmation("Advertencia: El cambio de estado es temprano. ¿Deseas continuar?");
+
     private void RevertToPreviousStatus() => CurrentStatusIndex = _previousStatusId;
 
-    private void ActivityTimerTick(object? sender, EventArgs e)
+    public void RestartApp()
     {
-        activityTimeSpan = activityTimeSpan.Add(TimeSpan.FromSeconds(1));
-        ActivityTime = activityTimeSpan.ToString();
+        IsRestarting = true;
+        IsShuttingDown = false;
+        App.Restart();
     }
 
-    private void SessionTimerTick(object? sender, EventArgs e)
-    {
-        sessionTimeSpan = sessionTimeSpan.Add(TimeSpan.FromSeconds(1));
-        SessionTime = sessionTimeSpan.ToString();
-    }
+    private void ResetActivityTimer() => activityTimeSpan = TimeSpan.Zero;
+
+    private static bool ShowConfirmation(string message)
+        => MessageBox.Show(message, "Confirmación", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+    private static void ShowInfo(string message)
+        => MessageBox.Show(message, "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+
+    private static bool ShowError(string message)
+        => MessageBox.Show(message, "Error", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes;
+
+    private bool IsEarlyBreakChange()
+        => (_previousStatusId == (int)SharedStatus.Break && activityTimeSpan.Minutes < MinimumBreakDurationMinutes)
+               && CurrentStatusIndex != (int)SharedStatus.Break;
 }
+

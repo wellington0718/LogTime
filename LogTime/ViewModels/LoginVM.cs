@@ -157,7 +157,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                         GlobalData.SessionData = newsessionData;
                         MainWindow mainWindow = app.ServiceProvider.GetRequiredService<MainWindow>();
                         mainWindow.Show();
-                        app.LoginWindow?.Close();
+                        app.LoginWindow.Close();
                     }
                     else
                     {

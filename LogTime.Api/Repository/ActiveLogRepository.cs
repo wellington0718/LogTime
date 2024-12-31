@@ -1,6 +1,4 @@
-﻿using LogTime.Api.Contracts;
-
-namespace LogTime.Api.Repository;
+﻿namespace LogTime.Api.Repository;
 
 public class ActiveLogRepository(LogTimeDataContext dataContext, IUserRepository userRepository, IStatusHistoryRepository statusHistoryRepository,
     ILogHistoryRepository logHistoryRepository)

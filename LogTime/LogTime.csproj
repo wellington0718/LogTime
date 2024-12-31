@@ -4,28 +4,19 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
+    <AssemblyVersion>3.2.0</AssemblyVersion>
+    <Runtime>net9.0</Runtime>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <StartupObject>LogTime.Program</StartupObject>
-    <!--<TargetName>LogTime_3.0.0_net9.0-windows.msi</TargetName>-->
-    <!--MSI installer configutarions-->
-    <InstallerOutputPath>Releases</InstallerOutputPath >
-    <!--<InstallerName>$(ProductName).$(AssemblyVersion).msi</InstallerName>-->
-    <ApplicationExecutable>LogTime.exe</ApplicationExecutable>
-    <CompanyName>Synergies Corp</CompanyName>
-    <Manufacturer>$(CompanyName)</Manufacturer>
-    <Version>$(AssemblyVersion)</Version>
-   
+    <ApplicationIcon>Images\icon.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="app.manifest" />
     <None Remove="icon.ico" />
-    <None Remove="Images\icon.ico" />
-    <None Remove="Images\icon_name.png" />
-    <None Remove="Images\person.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,19 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Clowd.Squirrel" Version="2.11.1" />-->
-    <PackageReference Include="BuildInstaller" Version="1.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <!--<PackageReference Include="Microsoft.Build.Framework" Version="17.12.6" />-->
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.12.6" />
+    <PackageReference Include="FluentFTP" Version="52.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Velopack" Version="0.0.1023" />
-    <!--<PackageReference Include="WixSharp" Version="1.26.0" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -53,16 +37,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Include="Images\icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\icon_name.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Images\person.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
@@ -74,16 +57,8 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Images\icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
   <Target Name="PostPublishTarget" Condition=" '$(Configuration)' == 'Release'" AfterTargets="Build">
-    <Exec Command="vpk pack -u LogTime.$(AssemblyVersion) -i $(TargetDir)\Images\icon.ico -v $(AssemblyVersion) -p $(TargetDir) -e LogTime.exe" />
+    <Exec Command="squirrel pack -u LogTime -i Images\icon.ico -v $(AssemblyVersion) -f $(Runtime) --appIcon Images\icon.ico -p $(TargetDir)" />
   </Target>
-  
 </Project>
 

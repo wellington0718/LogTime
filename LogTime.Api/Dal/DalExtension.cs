@@ -7,7 +7,6 @@ public static class DalExtension
 {
     public static IServiceCollection AddRepository(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<ILogHistoryRepository, LogHistoryRepository>();
         services.AddScoped<ILogTimeUnitOfWork, LogTimeUnitOfWork>();
         services.AddScoped<IStatusHistoryRepository, StatusHistoryRepository>();

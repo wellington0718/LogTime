@@ -1,12 +1,8 @@
-﻿using LogTime.Api.Contracts;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq.Expressions;
-using System.Threading;
+﻿using System.Linq.Expressions;
 
 namespace LogTime.Api.Repository;
 
-public class GenericRepository<TEntity>(LogTimeDataContext dataContext) : IGenericRepository<TEntity>
+public abstract class GenericRepository<TEntity>(LogTimeDataContext dataContext) : IGenericRepository<TEntity>
     where TEntity : class
 {
 
