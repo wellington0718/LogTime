@@ -5,129 +5,146 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        WindowStyle="SingleBorderWindow" 
-        Icon="Images/icon.png"
-        ResizeMode="CanMinimize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        BorderThickness="0"
+        MouseLeftButtonDown="OnMouseLeftButtonDown"
         Topmost="True"
         WindowStartupLocation="CenterScreen"
-        Height="320" Width="530">
+        Height="315" Width="530">
 
-    <StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Background="#323232">
-            <Menu FontSize="13">
-                <MenuItem Header="Cerrar sessión" Command="{Binding CloseSessionCommand}"/>
-            </Menu>
+    <Border CornerRadius="5" BorderThickness="1" BorderBrush="Gray">
+        
+        <Border CornerRadius="5" Background="{StaticResource PrimaryBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <Menu FontSize="13">
-                <MenuItem Header="Reportes" />
-            </Menu>
+                <!-- Header Section -->
+                <Grid Margin="0, -5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            <Menu FontSize="13">
-                <MenuItem Header="Administración">
-                    <MenuItem Header="New" />
-                    <MenuItem Header="New window" />
-                    <MenuItem Header="Open..." />
-                    <MenuItem Header="Save" />
-                    <MenuItem Header="Save As..." />
-                    <Separator />
-                    <MenuItem Header="Exit" />
-                </MenuItem>
-            </Menu>
-            <Menu FontSize="13">
-                <MenuItem Header="Logs" />
-            </Menu>
-
-            <Menu FontSize="13">
-                <MenuItem Header="Ayuda" />
-            </Menu>
-
-            <Border Background="#323232" Width="35" Height="35" CornerRadius="50" BorderBrush="Gray" BorderThickness="1" 
-                        MouseLeftButtonDown="OpenFlyout" Margin="30,0,0,0">
-                <TextBlock FontSize="15" Text="{Binding SessionData.User.Initials}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </Border>
-
-            <Popup x:Name="FlyoutPopup" Placement="MousePoint" StaysOpen="False" PopupAnimation="Slide">
-                <Border BorderBrush="Gray" BorderThickness="1" Padding="5" Background="#323232">
-                    <StackPanel x:Name="userProfile" Margin="5" Width="300px">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="Images/icon.png" Height="20" HorizontalAlignment="Left" Margin="10,0,10,0"/>
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Text="LOGTIME"/>
 
                         <StackPanel Orientation="Horizontal">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="ID:" Margin="0,0,10,10"/>
-                            <TextBlock FontSize="15" Text="{Binding SessionData.User.Id}" FontWeight="UltraLight"/>
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="20" Margin="15,0,0,0"/>
                         </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="Nombre:" Margin="0,0,10,10"/>
-                            <TextBlock FontSize="15" Text="{Binding SessionData.User.FullName}" FontWeight="UltraLight"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
-                            <Label FontSize="15" FontWeight="SemiBold" Content="Proyecto:" Margin="0,0,10,10"/>
-                            <TextBlock FontSize="15" Text="{Binding SessionData.User.Project.Project_Desc}" FontWeight="UltraLight"/>
-                        </StackPanel>
-
-                        <Separator />
-                        <Button FontSize="15" Content="Cerrar sessión" Margin="0,20,0,10" FontWeight="SemiBold" Command="{Binding CloseSessionCommand}"/>
                     </StackPanel>
-                </Border>
-            </Popup>
-        </StackPanel>
 
-        <Border Margin="0, 10,0,0" Width="500" CornerRadius="12">
-            <StackPanel HorizontalAlignment="Center" Margin="0">
+                    <Menu Grid.Column="1">
+                        <MenuItem Header="File" FontSize="14" Cursor="Hand" >
+                            <MenuItem Header="Reportes" Cursor="Hand" Tag="Reports" Click="NavigateToUrl"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <Border Background="#323232" CornerRadius="8" Padding="28, 10">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label FontSize="14" FontWeight="SemiBold" Content="Inicio de sesión" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Text="{Binding LoginDate}" FontWeight="UltraLight"/>
-                        </StackPanel>
-                    </Border>
+                            <MenuItem Header="Administración" Cursor="Hand">
+                                <MenuItem Header="Actividades" Cursor="Hand" Tag="Activities" Click="NavigateToUrl"/>
+                                <MenuItem Header="Sesiones activas" Cursor="Hand" Tag="UsersSessions" Click="NavigateToUrl"/>
+                                <MenuItem Header="Grupos" Cursor="Hand" Tag="Groups" Click="NavigateToUrl"/>
+                            </MenuItem>
+                            <MenuItem Header="Logs" Cursor="Hand" Click="ShowLogsDialog"/>
+                            <MenuItem Header="Ayuda" Cursor="Hand" Click="ShowHelpDialog"/>
+                            <Separator />
+                            <MenuItem Header="Cerrar sessión" Command="{Binding CloseSessionCommand}" />
+                        </MenuItem>
+                    </Menu>
+                   
+                    <StackPanel  Grid.Column="2" Margin="230,0,0,0" Orientation="Horizontal">
+                        <Border Margin="0,0,30,0" Background="#323232" Width="30" Height="30" CornerRadius="50" BorderBrush="Gray" BorderThickness="1" 
+                        MouseLeftButtonDown="OpenFlyout" Cursor="Hand">
+                            <TextBlock FontSize="15" Text="{Binding SessionData.User.Initials}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
 
-                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="19, 10">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Label FontSize="14" FontWeight="SemiBold" Content="Conexión servidor" HorizontalAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" Text="{Binding ServerConnection}" FontWeight="UltraLight"/>
-                        </StackPanel>
-                    </Border>
+                        <Popup x:Name="FlyoutPopup" Placement="MousePoint" StaysOpen="False" PopupAnimation="Slide" >
+                            <Border BorderBrush="Gray" BorderThickness="1" Padding="5" Background="#323232">
+                                <StackPanel x:Name="userProfile" Margin="5" Width="300px">
 
-                </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{StaticResource LabelStyle}" Content="ID:" />
+                                        <TextBlock FontSize="15" Margin="10,5,0,0" Text="{Binding SessionData.User.Id}" FontWeight="UltraLight"/>
+                                    </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 15">
-                    <Border Background="#323232" CornerRadius="8" Padding="12, 10">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Label FontSize="14" FontWeight="SemiBold" Content="Tiempo de actividad" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding ActivityTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
-                        </StackPanel>
-                    </Border>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Nombre:"/>
+                                        <TextBlock FontSize="15" Margin="10,5,0,0" Text="{Binding SessionData.User.FullName}" FontWeight="UltraLight"/>
+                                    </StackPanel>
 
-                    <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="22, 10">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Label FontSize="14" FontWeight="SemiBold" Content="Tiempo de sesión" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding SessionTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Proyecto:"/>
+                                        <TextBlock FontSize="15" Margin="10,5,0,0" Text="{Binding SessionData.User.Project.Project_Desc}" FontWeight="UltraLight"/>
+                                    </StackPanel>
 
+                                    <Separator />
+                                    <Button FontSize="15" Content="Cerrar sessión" Margin="0,10,0,0" FontWeight="SemiBold" Command="{Binding CloseSessionCommand}"/>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
 
-                <Border Background="#323232" CornerRadius="8" Padding="5">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-
-                        <Label Margin="0, 6, 10, 0" FontWeight="SemiBold" Content="Actividad:" FontSize="16"/>
-
-                        <ComboBox Width="200" Background="#323232" SelectedIndex="{Binding CurrentStatusIndex, UpdateSourceTrigger=LostFocus}"
-                                  ItemsSource="{Binding SessionData.User.Project.Statuses}" DisplayMemberPath="Description" DropDownClosed="ChangeActivity"/>
-
+                        <Button Content="&#8210;" VerticalContentAlignment="Center" FontSize="18" Click="MinimizeWindow" Style="{DynamicResource TitleBarButtonStyle}"/>
+                        <Button Content="&#10005;" VerticalContentAlignment="Center" Click="ShutdownApplication" FontSize="18" Style="{StaticResource TitleBarButtonStyle}"/>
                     </StackPanel>
-                </Border>
 
+                </Grid>
 
-            </StackPanel>
+                <!-- Main Content Section -->
+                <StackPanel Grid.Row="1" Margin="0, 12,0,0" Width="400">
+                    <Border  Background="Gray" CornerRadius="12" Padding="10"  HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" Margin="0">
+
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="#323232" CornerRadius="8" Padding="25, 10">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Inicio de sesión"/>
+                                        <TextBlock HorizontalAlignment="Center" Text="{Binding LoginDate}" FontWeight="UltraLight"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="19, 10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Conexión servidor"/>
+                                        <TextBlock HorizontalAlignment="Center" Text="{Binding ServerConnection}" FontWeight="UltraLight"/>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 15">
+                                <Border Background="#323232" CornerRadius="8" Padding="12, 10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Tiempo de actividad"/>
+                                        <TextBlock Text="{Binding ActivityTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="10, 0, 0, 0" Background="#323232" CornerRadius="8" Padding="22, 10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Label Style="{StaticResource LabelStyle}" Content="Tiempo de sesión"/>
+                                        <TextBlock Text="{Binding SessionTime, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontWeight="UltraLight"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <Border Background="#323232" CornerRadius="8" Padding="0, 5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                                    <Label Margin="0, 6, 10, 0" FontWeight="SemiBold" Content="Actividad:" FontSize="14"/>
+                                    <ComboBox Cursor="Hand" Width="200" Background="#323232" SelectedIndex="{Binding CurrentStatusIndex, UpdateSourceTrigger=LostFocus}"
+                                      ItemsSource="{Binding SessionData.User.Project.Statuses}" DisplayMemberPath="Description" DropDownClosed="ChangeActivity"/>
+
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </Border>
-
-
-        <StackPanel Background="#323232" Height="25" Margin="0, 12, 0, 0">
-            <TextBlock x:Name="CopyRightText" Margin="8, 4, 0, 0" FontSize="13" FontWeight="SemiBold"/>
-        </StackPanel>
-    </StackPanel>
-
+    </Border>
 </Window>

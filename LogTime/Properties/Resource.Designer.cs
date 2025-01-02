@@ -22,14 +22,14 @@ namespace LogTime.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class Resource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Resource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace LogTime.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LogTime.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LogTime.Properties.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,47 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ocurrió un error al intentar cambiar la actividad..
+        /// </summary>
+        internal static string ACTIVITY_CHANGE_ERROR {
+            get {
+                return ResourceManager.GetString("ACTIVITY_CHANGE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Error al cambiar de actividad.
+        /// </summary>
+        internal static string ACTIVITY_CHANGE_ERROR_TITLE {
+            get {
+                return ResourceManager.GetString("ACTIVITY_CHANGE_ERROR_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LogTime - Error de autenticación.
         /// </summary>
         internal static string AUTH_ERROR_TITLE {
             get {
                 return ResourceManager.GetString("AUTH_ERROR_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to La sesión ya había sido cerrada por alguien más o por un servicio..
+        /// </summary>
+        internal static string CLOSE_SESSION {
+            get {
+                return ResourceManager.GetString("CLOSE_SESSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Sesión cerrada.
+        /// </summary>
+        internal static string CLOSE_SESSION_TITLE {
+            get {
+                return ResourceManager.GetString("CLOSE_SESSION_TITLE", resourceCulture);
             }
         }
         
@@ -97,11 +133,29 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tiempo de inactividad límite alcanzado. .
+        ///   Looks up a localized string similar to El Límite de  tiempo de inactividad alcanzado. .
         /// </summary>
         internal static string IDLE_TIMER_LIMIT_INFO {
             get {
                 return ResourceManager.GetString("IDLE_TIMER_LIMIT_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None of the network adapters is connected to a network..
+        /// </summary>
+        internal static string LOG_NETWORK_ADAPTER_OFF {
+            get {
+                return ResourceManager.GetString("LOG_NETWORK_ADAPTER_OFF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network adapter is back on..
+        /// </summary>
+        internal static string LOG_NETWORK_ADAPTER_ON {
+            get {
+                return ResourceManager.GetString("LOG_NETWORK_ADAPTER_ON", resourceCulture);
             }
         }
         
@@ -138,6 +192,42 @@ namespace LogTime.Properties {
         internal static string RESTRICTED_ACCESS_TITLE {
             get {
                 return ResourceManager.GetString("RESTRICTED_ACCESS_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;Ocurrió un error. Puedes intentar cerrar la sesión nuevamente o reiniciar la aplicación.&quot;.
+        /// </summary>
+        internal static string RETRY_CLOSE_SESSION {
+            get {
+                return ResourceManager.GetString("RETRY_CLOSE_SESSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Error de sesión.
+        /// </summary>
+        internal static string RETRY_CLOSE_SESSION_TITLE {
+            get {
+                return ResourceManager.GetString("RETRY_CLOSE_SESSION_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ha ocurrido un error desconocido al procesar la información..
+        /// </summary>
+        internal static string UNKNOWN_ERROR {
+            get {
+                return ResourceManager.GetString("UNKNOWN_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Error desconocido.
+        /// </summary>
+        internal static string UNKNOWN_ERROR_TITLE {
+            get {
+                return ResourceManager.GetString("UNKNOWN_ERROR_TITLE", resourceCulture);
             }
         }
     }

@@ -7,10 +7,11 @@
         xmlns:customcontrols="clr-namespace:LogTime.CustomControls"
         mc:Ignorable="d"
         Title="Loading" Height="60" Width="380" 
-        WindowStyle="None" 
         ResizeMode="NoResize" 
+        Topmost="true"
         Background="Transparent"
         AllowsTransparency="True" 
+        WindowStyle="None"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
 

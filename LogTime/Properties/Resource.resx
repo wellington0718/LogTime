@@ -117,8 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ACTIVITY_CHANGE_ERROR" xml:space="preserve">
+    <value>Ocurrió un error al intentar cambiar la actividad.</value>
+  </data>
+  <data name="ACTIVITY_CHANGE_ERROR_TITLE" xml:space="preserve">
+    <value>LogTime - Error al cambiar de actividad</value>
+  </data>
   <data name="AUTH_ERROR_TITLE" xml:space="preserve">
     <value>LogTime - Error de autenticación</value>
+  </data>
+  <data name="CLOSE_SESSION" xml:space="preserve">
+    <value>La sesión ya había sido cerrada por alguien más o por un servicio.</value>
+  </data>
+  <data name="CLOSE_SESSION_TITLE" xml:space="preserve">
+    <value>LogTime - Sesión cerrada</value>
   </data>
   <data name="CREDENTIALS_ERROR" xml:space="preserve">
     <value>Las credenciales no son validas.</value>
@@ -130,7 +142,13 @@
     <value>LogTime - Cambio de Break </value>
   </data>
   <data name="IDLE_TIMER_LIMIT_INFO" xml:space="preserve">
-    <value>Tiempo de inactividad límite alcanzado. </value>
+    <value>El Límite de  tiempo de inactividad alcanzado. </value>
+  </data>
+  <data name="LOG_NETWORK_ADAPTER_OFF" xml:space="preserve">
+    <value>None of the network adapters is connected to a network.</value>
+  </data>
+  <data name="LOG_NETWORK_ADAPTER_ON" xml:space="preserve">
+    <value>The network adapter is back on.</value>
   </data>
   <data name="OPEN_SESSION_MESSAGE" xml:space="preserve">
     <value>Ya existe una sesión iniciada con el usuario {0} en la PC {1} ¿Deseas continuar para cerrar esa sesión?</value>
@@ -143,5 +161,17 @@
   </data>
   <data name="RESTRICTED_ACCESS_TITLE" xml:space="preserve">
     <value>LogTime - Sin acceso</value>
+  </data>
+  <data name="RETRY_CLOSE_SESSION" xml:space="preserve">
+    <value>"Ocurrió un error. Puedes intentar cerrar la sesión nuevamente o reiniciar la aplicación."</value>
+  </data>
+  <data name="RETRY_CLOSE_SESSION_TITLE" xml:space="preserve">
+    <value>LogTime - Error de sesión</value>
+  </data>
+  <data name="UNKNOWN_ERROR" xml:space="preserve">
+    <value>Ha ocurrido un error desconocido al procesar la información.</value>
+  </data>
+  <data name="UNKNOWN_ERROR_TITLE" xml:space="preserve">
+    <value>LogTime - Error desconocido</value>
   </data>
 </root>

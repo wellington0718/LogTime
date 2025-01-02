@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Domain.Models;
 using LogTime.Contracts;
 using LogTime.Properties;
+using LogTime.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
@@ -26,6 +27,8 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
     [RelayCommand]
     public async Task Login()
     {
+        var app = (App)Application.Current;
+
         UserId = UserId.Trim().PadLeft(8, '0');
 
         var logEntry = new LogEntry
@@ -42,7 +45,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
             if (!ValidateCredentialFormat())
             {
-                MessageBox.Show(Resources.CREDENTIALS_ERROR, Resources.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -64,17 +67,17 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
             if (validateCredData.Title.Equals(nameof(StatusMessage.Unauthorized)))
             {
-                logEntry.LogMessage = Resources.CREDENTIALS_ERROR;
+                logEntry.LogMessage = Resource.CREDENTIALS_ERROR;
                 logService.Log(logEntry);
-                MessageBox.Show(Resources.CREDENTIALS_ERROR, Resources.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             else if (validateCredData.Title.Equals(nameof(StatusMessage.NotAllowed)))
             {
-                logEntry.LogMessage = Resources.RESTRICTED_ACCESS;
+                logEntry.LogMessage = Resource.RESTRICTED_ACCESS;
                 logService.Log(logEntry);
 
-                MessageBox.Show(Resources.RESTRICTED_ACCESS, Resources.RESTRICTED_ACCESS_TITLE, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Resource.RESTRICTED_ACCESS, Resource.RESTRICTED_ACCESS_TITLE, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -99,8 +102,8 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                     logEntry.LogMessage = "Se encontró una sesión activa.";
                     logService.Log(logEntry);
 
-                    var message = string.Format(Resources.OPEN_SESSION_MESSAGE, UserId, fetchSessionData.CurrentRemoteHost);
-                    var result = MessageBox.Show(message, Resources.OPEN_SESSION_TITLE, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var message = string.Format(Resource.OPEN_SESSION_MESSAGE, UserId, fetchSessionData.CurrentRemoteHost);
+                    var result = MessageBox.Show(message, Resource.OPEN_SESSION_TITLE, MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
@@ -120,7 +123,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                             logEntry.LogMessage = "Nueva sesión creada.";
                             logService.Log(logEntry);
 
-                            var app = (App)Application.Current;
                             GlobalData.SessionData = newsessionData;
                             MainWindow mainWindow = app.ServiceProvider.GetRequiredService<MainWindow>();
                             mainWindow.Show();
@@ -153,7 +155,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                         logService.Log(logEntry);
                         GlobalData.SessionData = newsessionData;
 
-                        var app = (App)Application.Current;
                         GlobalData.SessionData = newsessionData;
                         MainWindow mainWindow = app.ServiceProvider.GetRequiredService<MainWindow>();
                         mainWindow.Show();
@@ -172,6 +173,8 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
         }
         catch (Exception exception)
         {
+            var curentWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible);
+            loadingService.Close();
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);
             var message = exception.Message;
@@ -179,10 +182,17 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
         }
         finally
         {
+            app.LoginWindow.IsEnabled = true;
             loadingService.Close();
         }
     }
 
+    [RelayCommand]
+    public static void ShowHelpDialog()
+    {
+        var helpDialogWindow = new HelpWindow();
+        helpDialogWindow.Show();
+    }
     private bool ValidateCredentialFormat()
     {
         return

@@ -3,6 +3,8 @@
 public class Constants
 {
     public const string AppReleases = "RELEASES";
+    public const uint SPI_GETSCREENSAVERRUNNING = 114;
+    public const int MinimumBreakDurationMinutes = 2;
     public const string NUPKG = ".nupkg";
     public const string AppLocalUpdatesFolderPath = "LogTime/Updates";
     public const string AppName = "LogTime";

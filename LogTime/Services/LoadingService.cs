@@ -19,14 +19,13 @@ public class LoadingService : ILoadingService
                 _loading = new Loading
                 {
                     DataContext = _viewModel,
-                    Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)
+                    Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible)
                 };
 
                 if (_loading.Owner != null)
                     _loading.Owner.IsEnabled = false;
 
                 _loading.Show();
-
                 return;
             }
 

@@ -6,27 +6,64 @@
         xmlns:customcontrols="clr-namespace:LogTime.CustomControls"
         mc:Ignorable="d"
         ThemeMode="Dark"
-        Icon="Images/icon.png"
-        WindowStyle="SingleBorderWindow" 
-        ResizeMode="CanMinimize"
         Topmost="True"
+        WindowStyle="None"
+        BorderThickness="0"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseLeftButtonDown="OnMouseLeftButtonDown"
         WindowStartupLocation="CenterScreen"
         Height="420" Width="450">
 
-    <StackPanel>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Image Source="Images/icon.png" Height="75" Margin="0, 0, 0, 0"/>
-            <TextBlock FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" Text="LOGTIME" />
-            <TextBlock FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Text="Aplicación de registro de tiempo" Margin="0,0,0,20"/>
-            <StackPanel>
-                <Label Content="Empleado Id" FontSize="14"/>
-                <TextBox FontSize="16" Margin="0,0,0,10" Text="{Binding UserId, Mode=OneWayToSource}"/>
-                <Label Content="Contraseña" FontSize="14"/>
+    <Border CornerRadius="5" BorderThickness="1" BorderBrush="Gray">
+        <Border CornerRadius="12" Background="{StaticResource PrimaryBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition/>
 
-                <customcontrols:BindablePasswordBox Margin="0,0,0,10" Password="{Binding Password, Mode=OneWayToSource}"/>
-            </StackPanel>
-            <Button FontSize="14" HorizontalAlignment="Stretch" Height="40" Content="Iniciar sesión" Command="{Binding LoginCommand}"/>
-        </StackPanel>
-        <TextBlock HorizontalAlignment="Center" x:Name="CopyRightText" Margin="10,30,0,0" FontSize="14" FontWeight="SemiBold" />
-    </StackPanel>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0, -15, 0, 0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="80"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Background="Transparent" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="Images/icon.png" Height="20" HorizontalAlignment="Left" Margin="10,0,10,0"/>
+                        <TextBlock FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Text="LOGTIME" />
+                        <StackPanel Orientation="Horizontal">
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="20" Margin="15,0,0,0"/>
+                        </StackPanel>
+                        <Menu>
+                            <MenuItem Header="AYUDA" FontSize="14" Command="{Binding ShowHelpDialogCommand}"/>
+                        </Menu>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="&#8210;" VerticalContentAlignment="Center" FontSize="18" Click="MinimizeWindow" Style="{DynamicResource TitleBarButtonStyle}"/>
+                        <Button Content="&#10005;" VerticalContentAlignment="Center" Click="ShutdownApplication" FontSize="18" Style="{DynamicResource TitleBarButtonStyle}"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="Images/icon.png" Height="70" Margin="0, 0, 0, 0"/>
+                        <TextBlock FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" Text="LOGTIME" />
+                        <TextBlock FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Text="Aplicación de registro de tiempo" Margin="0,0,0,20"/>
+                        <StackPanel>
+                            <Label Content="Usuario Id" FontSize="14"/>
+                            <TextBox FontSize="16" Margin="0,0,0,10" Text="{Binding UserId, Mode=OneWayToSource}" KeyDown="ControlKeyDownEvent" />
+                            <Label Content="Contraseña" FontSize="14"/>
+
+                            <customcontrols:BindablePasswordBox Margin="0,0,0,10" Password="{Binding Password, Mode=OneWayToSource}" KeyDown="ControlKeyDownEvent"/>
+                        </StackPanel>
+                        <Button FontSize="14" HorizontalAlignment="Stretch" Height="40" Content="Iniciar sesión" Command="{Binding LoginCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Border>
+
 </Window>

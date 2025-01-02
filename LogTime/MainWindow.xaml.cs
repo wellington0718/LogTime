@@ -4,10 +4,12 @@ using LogTime.Services;
 using LogTime.Utils;
 using LogTime.ViewModels;
 using Squirrel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace LogTime;
 
@@ -22,12 +24,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Application.Current.ThemeMode = ThemeMode.Dark;
-        CopyRightText.Text = $"SYNERGIES © {DateTime.Now.Year}";
         Title = GlobalData.AppNameVersion;
         _mainVM = mainVM;
         _logService = logService;
         _ftpService = ftpService;
-        Closing += OnWindowClosing;
         DataContext = _mainVM;
 
         UpdateApp();
@@ -35,46 +35,7 @@ public partial class MainWindow : Window
 
     private void OpenFlyout(object sender, MouseButtonEventArgs e)
     {
-        double popupWidth = FlyoutPopup.Child.RenderSize.Width;
-        FlyoutPopup.HorizontalOffset = (popupWidth == 0 ? -300 : -popupWidth);
-        FlyoutPopup.VerticalOffset = 0;
         FlyoutPopup.IsOpen = true;
-    }
-
-    private async void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
-    {
-        e.Cancel = true;
-
-        if (_mainVM.IsShuttingDown || _mainVM.IsRestarting)
-            return;
-
-        _mainVM.IsShuttingDown = true;
-
-        try
-        {
-            await _mainVM.CloseSession();
-        }
-        catch (Exception exception)
-        {
-            var logEntry = new LogEntry
-            {
-                ClassName = nameof(MainWindow),
-                MethodName = nameof(OnWindowClosing),
-                UserId = GlobalData.SessionData.User?.Id,
-                LogMessage = exception.GetBaseException().Message
-            };
-
-            _logService.Log(logEntry);
-
-            MessageBox.Show(
-                $"({DateTime.Now}) Un error desconocido ocurrió al intentar cerrar la sesión.",
-                "Error de sesión",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
-
-            _mainVM.RestartApp();
-        }
     }
 
     private async void UpdateApp()
@@ -115,8 +76,80 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void ChangeActivity(object sender, EventArgs e)
+    private async void ChangeActivity(object sender, EventArgs e) => await _mainVM.ChangeActivity();
+
+    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
+    private void MinimizeWindow(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private async void ShutdownApplication(object sender, RoutedEventArgs e)
     {
-        await _mainVM.ChangeActivity();
+        if (_mainVM.IsShuttingDown || _mainVM.IsRestarting)
+            return;
+
+        _mainVM.IsShuttingDown = true;
+
+        try
+        {
+            await _mainVM.CloseSession();
+        }
+        catch (Exception exception)
+        {
+            var logEntry = new LogEntry
+            {
+                ClassName = nameof(MainWindow),
+                MethodName = nameof(ShutdownApplication),
+                UserId = GlobalData.SessionData.User?.Id,
+                LogMessage = exception.GetBaseException().Message
+            };
+
+            _logService.Log(logEntry);
+
+            MessageBox.Show(
+                $"({DateTime.Now}) Un error desconocido ocurrió al intentar cerrar la sesión.",
+                "Error de sesión",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+
+            _mainVM.RestartApp();
+        }
+    }
+
+    private void NavigateToUrl(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var endPoint = (string)((MenuItem)sender).Tag;
+            string baseUrl = "http://intranet/SynergiesSystem/LogTime";
+
+            baseUrl = endPoint switch
+            {
+                "Activities" => $"{baseUrl}/Activities",
+                "Groups" => $"{baseUrl}/SaveGroupInactivityTime",
+                "UsersSessions" => $"{baseUrl}/UsersSessions",
+                _ => baseUrl,
+            };
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = baseUrl,
+                UseShellExecute = true 
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to open browser: {ex.Message}");
+        }
+    }
+
+    private void ShowHelpDialog(object sender, RoutedEventArgs e)
+    {
+        var helpDialogWindow = new HelpWindow();
+        helpDialogWindow.Show();
+    }
+
+    private void ShowLogsDialog(object sender, RoutedEventArgs e)
+    {
+
     }
 }
