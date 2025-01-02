@@ -38,5 +38,7 @@ public partial class HelpWindow : Window
             FileName = e.Uri.AbsoluteUri,
             UseShellExecute = true
         });
+
+        Close();
     }
 }

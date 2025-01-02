@@ -44,7 +44,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0">
                 <!-- Hyperlink -->
                 <TextBlock Margin="10, 5, 70, 0" FontSize="12" Foreground="#0065B1">
-                <Hyperlink NavigateUri="http://intranet/SynergiesSystem" RequestNavigate="NavigateToUrl">
+                <Hyperlink NavigateUri="http://intranet/SynergiesSystem/LogTime" RequestNavigate="NavigateToUrl">
                     Visitar la página oficial de la aplicación
                 </Hyperlink>
                 </TextBlock>

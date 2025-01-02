@@ -16,7 +16,7 @@
 
     <Border CornerRadius="5" BorderThickness="1" BorderBrush="Gray">
         
-        <Border CornerRadius="5" Background="{StaticResource PrimaryBackgroundBrush}">
+        <Border CornerRadius="5" Background="{DynamicResource PrimaryBackgroundBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
