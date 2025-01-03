@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace LogTime.ViewModels;
+﻿namespace LogTime.ViewModels;
 
 public partial class LoadingVM : ObservableObject
 {

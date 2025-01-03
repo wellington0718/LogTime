@@ -89,7 +89,7 @@
                         </Popup>
 
                         <Button Content="&#8210;" VerticalContentAlignment="Center" FontSize="18" Click="MinimizeWindow" Style="{DynamicResource TitleBarButtonStyle}"/>
-                        <Button Content="&#10005;" VerticalContentAlignment="Center" Click="ShutdownApplication" FontSize="18" Style="{StaticResource TitleBarButtonStyle}"/>
+                        <Button Content="&#10005;" VerticalContentAlignment="Center" Command="{Binding CloseSessionCommand}" FontSize="18" Style="{StaticResource TitleBarButtonStyle}"/>
                     </StackPanel>
 
                 </Grid>

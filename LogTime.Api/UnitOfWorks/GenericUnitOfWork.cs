@@ -1,7 +1,4 @@
-﻿using LogTime.Api.Contracts;
-using Microsoft.EntityFrameworkCore.Storage;
-
-namespace LogTime.Api.UnitOfWorks;
+﻿namespace LogTime.Api.UnitOfWorks;
 
 public abstract class GenericUnitOfWork(LogTimeDataContext context) : IGenericUnitOfWork, IDisposable
 {

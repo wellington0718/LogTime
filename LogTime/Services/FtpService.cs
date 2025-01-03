@@ -1,11 +1,4 @@
-﻿using Domain.Models;
-using FluentFTP;
-using LogTime.Utils;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using System.Net;
-
-namespace LogTime.Services;
+﻿namespace LogTime.Services;
 
 public class FtpService
 {

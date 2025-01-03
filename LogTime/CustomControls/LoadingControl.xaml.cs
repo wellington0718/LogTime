@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
-namespace LogTime.CustomControls;
+﻿namespace LogTime.CustomControls;
 
 public partial class LoadingControl : UserControl
 {

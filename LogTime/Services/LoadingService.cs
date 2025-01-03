@@ -1,9 +1,4 @@
-﻿using LogTime.Contracts;
-using LogTime.Properties;
-using LogTime.ViewModels;
-using System.Windows;
-
-namespace LogTime.Services;
+﻿namespace LogTime.Services;
 
 public class LoadingService : ILoadingService
 {
@@ -52,6 +47,6 @@ public class LoadingService : ILoadingService
 
     public MessageBoxResult MessageBox(string message, string title, MessageBoxButton buttonType, MessageBoxImage messageImage)
     {
-       return System.Windows.MessageBox.Show(message, title, buttonType, messageImage);
+        return System.Windows.MessageBox.Show(message, title, buttonType, messageImage);
     }
 }

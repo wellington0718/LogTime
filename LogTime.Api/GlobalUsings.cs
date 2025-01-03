@@ -6,3 +6,7 @@ global using LogTime.Api;
 global using LogTime.Api.Dal;
 global using Scalar.AspNetCore;
 global using System.Text.Json.Serialization;
+global using System.Linq.Expressions;
+global using LogTime.Api.Repository;
+global using LogTime.Api.UnitOfWorks;
+global using Microsoft.EntityFrameworkCore.Storage;

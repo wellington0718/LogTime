@@ -1,6 +1,4 @@
-﻿using Domain.Models;
-
-namespace LogTime.Api.Contracts;
+﻿namespace LogTime.Api.Contracts;
 
 public interface IUserRepository
 {

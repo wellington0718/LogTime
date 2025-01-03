@@ -1,7 +1,4 @@
-﻿using LogTime.ViewModels;
-using System.Windows;
-using System.Windows.Input;
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class Login : Window
 {

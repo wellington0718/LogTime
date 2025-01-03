@@ -1,6 +1,4 @@
-﻿using Domain.Models;
-
-namespace LogTime.Contracts;
+﻿namespace LogTime.Contracts;
 
 public interface ILogService
 {

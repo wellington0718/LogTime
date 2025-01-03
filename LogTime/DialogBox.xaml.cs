@@ -1,8 +1,4 @@
-﻿using Domain.Models;
-using System.Windows;
-using System.Windows.Controls;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class DialogBox : Window
 {

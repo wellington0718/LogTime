@@ -1,10 +1,4 @@
-﻿using Domain.Models;
-using LogTime.Contracts;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-
-namespace LogTime.Services;
+﻿namespace LogTime.Services;
 
 public class LogTimeApiClient : ILogTimeApiClient
 {

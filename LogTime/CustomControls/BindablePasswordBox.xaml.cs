@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
-namespace LogTime.CustomControls;
+﻿namespace LogTime.CustomControls;
 
 public partial class BindablePasswordBox : UserControl
 {
@@ -9,7 +6,7 @@ public partial class BindablePasswordBox : UserControl
 
     public string Password
     {
-        get => (string) GetValue(PasswordProperty);
+        get => (string)GetValue(PasswordProperty);
         set => SetValue(PasswordProperty, value);
     }
 

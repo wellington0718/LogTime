@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace LogTime.Api.Contracts;
+﻿namespace LogTime.Api.Contracts;
 
 public interface IGenericRepository<TEntity> where TEntity : class
 {

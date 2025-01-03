@@ -1,7 +1,4 @@
-﻿using LogTime.Api.Repository;
-using LogTime.Api.UnitOfWorks;
-
-namespace LogTime.Api.Dal;
+﻿namespace LogTime.Api.Dal;
 
 public static class DalExtension
 {

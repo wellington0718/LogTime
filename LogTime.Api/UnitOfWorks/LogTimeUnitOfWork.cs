@@ -1,6 +1,4 @@
-﻿using LogTime.Api.Contracts;
-
-namespace LogTime.Api.UnitOfWorks;
+﻿namespace LogTime.Api.UnitOfWorks;
 
 public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider provider) : GenericUnitOfWork(dataContext), ILogTimeUnitOfWork
 {

@@ -1,16 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Domain.Models;
-using LogTime.Contracts;
-using LogTime.Properties;
-using LogTime.Utils;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Threading;
-
-namespace LogTime.ViewModels;
+﻿namespace LogTime.ViewModels;
 
 public partial class MainVM : ObservableObject
 {

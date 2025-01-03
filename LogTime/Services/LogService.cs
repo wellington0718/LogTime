@@ -1,8 +1,4 @@
-﻿using Domain.Models;
-using LogTime.Contracts;
-using System.IO;
-
-namespace LogTime.Services;
+﻿namespace LogTime.Services;
 
 public class LogService : ILogService
 {
@@ -21,7 +17,7 @@ public class LogService : ILogService
         }
 
         using var writer = new StreamWriter(filePath, append: true);
-      
+
         if (!fileExists)
         {
             writer.WriteLine(header);

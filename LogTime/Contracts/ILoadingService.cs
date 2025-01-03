@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace LogTime.Contracts;
+﻿namespace LogTime.Contracts;
 
 public interface ILoadingService
 {

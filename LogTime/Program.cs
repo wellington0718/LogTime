@@ -1,10 +1,4 @@
-﻿using LogTime.Utils;
-using Squirrel;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Windows;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 static class Program
 {
@@ -14,9 +8,6 @@ static class Program
 
     [DllImport("user32.dll")]
     static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    const int SW_SHOWMAXIMIZED = 3;
-
 
     [STAThread]
     public static void Main(string[] args)
@@ -54,7 +45,7 @@ static class Program
                 process.MainModule?.FileName == currentProcess.MainModule?.FileName &&
                 process.MainWindowHandle != IntPtr.Zero)
             {
-                ShowWindow(process.MainWindowHandle, SW_SHOWMAXIMIZED);
+                ShowWindow(process.MainWindowHandle, Constants.SW_RESTORE);
                 SetForegroundWindow(process.MainWindowHandle);
                 break;
             }

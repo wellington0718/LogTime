@@ -1,18 +1,11 @@
-﻿using Domain.Models;
-using LogTime.Contracts;
-using LogTime.Services;
-using LogTime.ViewModels;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
-using System.Windows;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class App : Application
 {
     public IServiceProvider ServiceProvider { get; private set; }
     public IConfiguration Configuration { get; private set; }
+    private static readonly string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    private static FtpService? _ftpService;
 
     public Login LoginWindow { get; }
 
@@ -27,6 +20,7 @@ public partial class App : Application
         ConfigureServices(serviceCollection);
         ServiceProvider = serviceCollection.BuildServiceProvider();
         LoginWindow = ServiceProvider.GetRequiredService<Login>();
+        _ftpService = ServiceProvider.GetRequiredService<FtpService>();
     }
 
     public static void Restart()
@@ -39,9 +33,47 @@ public partial class App : Application
         }
     }
 
+    public static async void Update()
+    {
+        try
+        {
+            var appUpdatesLocalFolderPath = $"{localApplicationData}/{Constants.AppLocalUpdatesFolderPath}";
+            await _ftpService!.DownloadFiles(Constants.AppReleases);
+
+            using var mgr = new UpdateManager(appUpdatesLocalFolderPath);
+
+            if (mgr.IsInstalledApp)
+            {
+                var updateAppInfo = await mgr.CheckForUpdate();
+
+                if (updateAppInfo.ReleasesToApply.Count != 0)
+                {
+                    await _ftpService.DownloadFiles(Constants.NUPKG);
+                    var update = await mgr.UpdateApp();
+
+                    var newVersion = $"{update.Version.Major}.{update.Version.Minor}";
+                    Directory.Delete(appUpdatesLocalFolderPath, true);
+
+                    Current.Dispatcher.Invoke(() =>
+                    {
+                        var newVersionMessage = $"¡Una nueva versión de LogTime ({newVersion}) está disponible! Los cambios se aplicarán cuando reinicies la aplicación.";
+                        MessageBox.Show(newVersionMessage, "LogTime - Actualización Disponible", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Current.Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show(ex.Message, "LogTime - Error de actualización", MessageBoxButton.OK, MessageBoxImage.Error);
+            });
+        }
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
-       LoginWindow.Show();
+        LoginWindow.Show();
     }
 
     private void ConfigureServices(IServiceCollection services)

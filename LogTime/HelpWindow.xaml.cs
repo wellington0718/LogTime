@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class HelpWindow : Window
 {

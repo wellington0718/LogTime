@@ -1,6 +1,4 @@
-﻿using LogTime.Api.Contracts;
-
-namespace LogTime.Api.Controllers
+﻿namespace LogTime.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]

@@ -1,13 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Domain.Models;
-using LogTime.Contracts;
-using LogTime.Properties;
-using LogTime.Services;
-using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
-
-namespace LogTime.ViewModels;
+﻿namespace LogTime.ViewModels;
 
 public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService loadingService, ILogService logService) : ObservableObject
 {
