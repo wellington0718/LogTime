@@ -95,7 +95,7 @@
                 </Grid>
 
                 <!-- Main Content Section -->
-                <StackPanel Grid.Row="1" Margin="0, 12,0,0" Width="400">
+                <StackPanel Grid.Row="1" Margin="0, 20,0,0" Width="400">
                     <Border  Background="Gray" CornerRadius="12" Padding="10"  HorizontalAlignment="Center">
                         <StackPanel HorizontalAlignment="Center" Margin="0">
 

@@ -1,4 +1,5 @@
 ﻿using LogTime.Contracts;
+using LogTime.Properties;
 using LogTime.ViewModels;
 using System.Windows;
 
@@ -37,15 +38,20 @@ public class LoadingService : ILoadingService
     public void Close()
     {
         Application.Current.Dispatcher.Invoke(() =>
-        {
-            if (_loading != null)
             {
-                if (_loading.Owner != null)
-                    _loading.Owner.IsEnabled = true;
+                if (_loading != null)
+                {
+                    if (_loading.Owner != null)
+                        _loading.Owner.IsEnabled = true;
 
-                _loading.Close();
-                _loading = null;
-            }
-        });
+                    _loading.Close();
+                    _loading = null;
+                }
+            });
+    }
+
+    public MessageBoxResult MessageBox(string message, string title, MessageBoxButton buttonType, MessageBoxImage messageImage)
+    {
+       return System.Windows.MessageBox.Show(message, title, buttonType, messageImage);
     }
 }

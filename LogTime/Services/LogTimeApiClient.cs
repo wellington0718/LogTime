@@ -27,21 +27,28 @@ public class LogTimeApiClient : ILogTimeApiClient
 
     private async Task<T> SendAsync<T>(string endpoint, object? body = null)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        Console.WriteLine("SendAsync: Starting request...");
 
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
         if (body != null)
         {
             var content = JsonSerializer.Serialize(body, _jsonOptions);
             request.Content = new StringContent(content, Encoding.UTF8, "application/json");
         }
 
+        Console.WriteLine("SendAsync: Sending request...");
         using var response = await _httpClient.SendAsync(request);
+        Console.WriteLine("SendAsync: Request completed.");
+
         response.EnsureSuccessStatusCode();
 
+        Console.WriteLine("SendAsync: Reading response...");
         var responseDataString = await response.Content.ReadAsStringAsync();
 
+        Console.WriteLine("SendAsync: Deserializing response...");
         var responseDataObj = JsonSerializer.Deserialize<T>(responseDataString, _jsonOptions) ?? throw new InvalidOperationException("Failed to deserialize response.");
 
+        Console.WriteLine("SendAsync: Retur");
         return responseDataObj;
     }
 

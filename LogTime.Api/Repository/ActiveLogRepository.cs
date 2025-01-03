@@ -55,30 +55,30 @@ public class ActiveLogRepository(LogTimeDataContext dataContext, IUserRepository
         return newSessionData;
     }
 
-    public async Task<bool> CloseActiveSessionsAsync(string loggedOutBy, string userId)
+    public async Task<bool> CloseActiveSessionsAsync(SessionLogOutData sessionLogOutData)
     {
-        var idList = userId.Split(',').ToList();
-        var logHistories = await logHistoryRepository.GetListAsync(log => log.LogoutDate == null && idList.Contains(log.IdUser));
+        var idList = string.IsNullOrEmpty(sessionLogOutData.UserIds)
+            ? []
+            : sessionLogOutData.UserIds.Split(',').ToList();
+
+        IEnumerable<LogHistory> logHistories = idList.Count != 0
+            ? await logHistoryRepository.GetListAsync(log => log.LogoutDate == null && idList.Contains(log.IdUser))
+            : await logHistoryRepository.GetListAsync(log => log.LogoutDate == null && log.Id == sessionLogOutData.Id);
 
         if (!logHistories.Any())
-            return await Task.FromResult(true);
+            return true;
 
         var currentDate = DateTime.Now;
 
-        var logOutDate = currentDate;
-
         foreach (var logHistory in logHistories)
         {
-            if (logHistory.LastTimeConnectionAlive.HasValue
-                && RelevantTimeDifference(currentDate, logHistory.LastTimeConnectionAlive.Value))
-            {
-                logOutDate = logHistory.LastTimeConnectionAlive.Value;
-            }
+            logHistory.LogoutDate = DetermineLogoutDate(currentDate, logHistory.LastTimeConnectionAlive);
+            logHistory.LogedOutBy = string.IsNullOrEmpty(sessionLogOutData.LoggedOutBy)
+                ? "New session"
+                : sessionLogOutData.LoggedOutBy;
 
-            logHistory.LogoutDate = logOutDate;
-            logHistory.LogedOutBy = string.IsNullOrEmpty(loggedOutBy) ? "New session" : loggedOutBy;
-
-            var activityLogs = await statusHistoryRepository.GetListAsync(a => a.LogId == logHistory.Id && a.StatusEndTime == null);
+            var activityLogs = await statusHistoryRepository.GetListAsync(activityLog =>
+                activityLog.LogId == logHistory.Id && activityLog.StatusEndTime == null);
 
             foreach (var activityLog in activityLogs)
             {
@@ -93,13 +93,16 @@ public class ActiveLogRepository(LogTimeDataContext dataContext, IUserRepository
         var activeLogs = await GetListAsync(activeLog => idList.Contains(activeLog.UserId));
         DeleteAsync(activeLogs);
 
-        var result = await SaveChangesAsync();
-
-        return result;
+        return await SaveChangesAsync();
     }
 
-    private static bool RelevantTimeDifference(DateTime currentTime, DateTime lastConnectionAliveTime)
+    private static DateTime DetermineLogoutDate(DateTime currentDate, DateTime? lastTimeConnectionAlive)
     {
-        return (currentTime - lastConnectionAliveTime).TotalMinutes is > 2 or < 0;
+        if (lastTimeConnectionAlive.HasValue && (currentDate - lastTimeConnectionAlive.Value).TotalMinutes is > 2 or < 0)
+        {
+            return lastTimeConnectionAlive.Value;
+        }
+
+        return currentDate;
     }
 }

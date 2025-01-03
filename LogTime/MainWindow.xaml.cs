@@ -9,7 +9,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Navigation;
 
 namespace LogTime;
 
@@ -133,7 +132,7 @@ public partial class MainWindow : Window
             Process.Start(new ProcessStartInfo
             {
                 FileName = baseUrl,
-                UseShellExecute = true 
+                UseShellExecute = true
             });
         }
         catch (Exception ex)

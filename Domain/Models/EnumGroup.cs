@@ -20,3 +20,18 @@ public enum SharedStatus
     Lunch,
     NoActivity,
 }
+
+public enum DialogBoxButton
+{
+    YesNo,
+    Ok,
+    OkCancel,
+    RetryCancel
+}
+
+public enum AlertType
+{
+    Info,
+    Warning,
+    Error
+}

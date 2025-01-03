@@ -286,7 +286,7 @@ public partial class MainVM : ObservableObject
                     case nameof(SessionTime):
                         sessionTimeSpan = sessionTimeSpan.Add(TimeSpan.FromSeconds(1));
                         SessionTime = sessionTimeSpan.ToString(@"hh\:mm\:ss");
-                        await UpdateSessionAliveDateAsync(sessionTimeSpan);
+                        await UpdateSessionAliveDateAsync();
                         await CloseSessionByUserGroupLogOutTimeReached();
                         break;
                     case nameof(ActivityTime):
@@ -320,15 +320,15 @@ public partial class MainVM : ObservableObject
         }
     }
 
-    private async Task UpdateSessionAliveDateAsync(TimeSpan timeSpan)
+    private async Task UpdateSessionAliveDateAsync()
     {
-        if (timeSpan.Minutes % 1 == 0 && timeSpan.Seconds == 0)
+        if (sessionTimeSpan.Minutes % 1 == 0 && sessionTimeSpan.Seconds == 0)
         {
-            var UpdateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.ActiveLog.ActualLogHistoryId);
-            var hasResponseErros = HandleResponseErrors(UpdateSessionAliveDateResponse);
+            var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.ActiveLog.ActualLogHistoryId);
+            var hasResponseErros = HandleResponseErrors(updateSessionAliveDateResponse);
 
-            if (!hasResponseErros && UpdateSessionAliveDateResponse.LastDate is not null)
-                ServerConnection = UpdateSessionAliveDateResponse.LastDate.Value.ToString("yyyy-MM-dd HH:mm:ss");
+            if (!hasResponseErros && updateSessionAliveDateResponse.LastDate is not null)
+                ServerConnection = updateSessionAliveDateResponse.LastDate.Value.ToString("yyyy-MM-dd HH:mm:ss");
         }
     }
 
@@ -396,24 +396,30 @@ public partial class MainVM : ObservableObject
         logService.Log(new LogEntry { LogMessage = "Sesión cerrada.", ClassName = nameof(MainVM) });
     }
 
-    private bool HandleResponseErrors(BaseResponse response)
+    private bool HandleResponseErrors(BaseResponse baseResponse)
     {
-        if (response.IsSessionAlreadyClose)
+        if (baseResponse.IsSessionAlreadyClose)
         {
-            ShowInfo(Resource.CLOSE_SESSION, Resource.CLOSE_SESSION_TITLE);
+            DialogBox.Show(Resource.CLOSE_SESSION, Resource.CLOSE_SESSION_TITLE);
             RestartApp();
             return true;
         }
 
-        if (response.HasError)
+        if (baseResponse.HasError)
         {
+            sessionTimer.Stop();
+            activityTimer.Stop();
+
             var retry = ShowError(Resource.RETRY_CLOSE_SESSION, Resource.RETRY_CLOSE_SESSION_TITLE);
-            if (!retry) RestartApp();
+            if (!retry)
+                RestartApp();
+
             return true;
         }
 
         return false;
     }
+
 
     private bool ConfirmCloseSession()
     {

@@ -173,7 +173,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
         }
         catch (Exception exception)
         {
-            var curentWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible);
             loadingService.Close();
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);

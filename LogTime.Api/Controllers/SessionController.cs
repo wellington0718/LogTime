@@ -10,7 +10,13 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(clientData.LoggedOutBy, clientData.User);
+            var sessionLogOutData = new SessionLogOutData()
+            {
+                LoggedOutBy = clientData.LoggedOutBy,
+                UserIds = clientData.User
+            };
+
+            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(sessionLogOutData);
             var newSessionData = await logTimeUnitOfWork.ActiveLogRepository.CreateNewSessionAsync(clientData);
             await logTimeUnitOfWork.CommitAsync();
 
@@ -33,9 +39,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            var idList = sessionLogOutData.UserIds.Split(',').ToList();
-            await logTimeUnitOfWork.ActiveLogRepository.DeleteAsync(activeLog => idList.Contains(activeLog.UserId));
-            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(sessionLogOutData.LoggedOutBy, sessionLogOutData.UserIds);
+            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(sessionLogOutData);
             await logTimeUnitOfWork.CommitAsync();
 
             return CreateResponse(new BaseResponse
