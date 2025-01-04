@@ -1,6 +1,4 @@
-﻿using LogTime.Api.Contracts;
-using Microsoft.EntityFrameworkCore;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using System.Data;
 
 namespace LogTime.Api.Repository;

@@ -2,13 +2,19 @@
 
 public partial class HelpWindow : Window
 {
+    public string AppDescription { get; }
+    public string AppVersion { get; }
+    public string CopyRight { get; }
+
     public HelpWindow()
     {
         InitializeComponent();
-        CopyRightText.Text = $"© Copyright {DateTime.Now.Year}, Synergies Corps. \n Todos los derechos reservados.";
-        AppNameVersion.Text = GlobalData.AppNameVersion;
+        DataContext = this;
+        CopyRight = string.Format(Resource.COPY_RIGHT, DateTime.Now.Year, Environment.NewLine);
+        AppVersion = $"Versión {GlobalData.AppVersion}";
         Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible);
 
+        AppDescription = Resource.APP_DESCRIPTION;
         if (Owner != null)
         {
             Owner.IsEnabled = false;

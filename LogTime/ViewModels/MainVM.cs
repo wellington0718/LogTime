@@ -15,8 +15,6 @@ public partial class MainVM : ObservableObject
 
     private readonly DispatcherTimer sessionTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly DispatcherTimer activityTimer = new() { Interval = TimeSpan.FromSeconds(1) };
-    private readonly DispatcherTimer idleTimer = new() { Interval = TimeSpan.FromSeconds(1) };
-
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
@@ -26,7 +24,6 @@ public partial class MainVM : ObservableObject
     private int _previousStatusId;
     private int? activityIdleTimeSeconds;
     private readonly LogEntry logEntry;
-
     private bool networkWasAlive;
     private bool isPcOnIdleState;
     private bool isPcLocked;
@@ -34,8 +31,6 @@ public partial class MainVM : ObservableObject
     private bool screenSaverLastState;
 
     public SessionData SessionData { get; }
-    public bool IsShuttingDown { get; set; }
-    public bool IsRestarting { get; set; }
 
     public MainVM()
     {
@@ -93,25 +88,32 @@ public partial class MainVM : ObservableObject
     {
         try
         {
-            if (IsEarlyBreakChange() && !ShowBreakWarning())
+            if (IsEarlyBreakChange() && !DialogBox.Show(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE))
             {
-                RevertToPreviousStatus();
+                CurrentStatusIndex = _previousStatusId;
                 return;
             }
 
             if (CurrentStatusIndex == (int)SharedStatus.Lunch)
             {
-                await CloseSession();
+                if (!DialogBox.Show(Resource.LUNCH_CONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question))
+                {
+                    CurrentStatusIndex = _previousStatusId;
+                    return;
+                }
+
+                await UpdateStatus(CurrentStatusIndex);
+                await HandleCloseSession();
+                Application.Current.Shutdown();
             }
             else
             {
                 await UpdateStatus(CurrentStatusIndex);
             }
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            HandleException(ex.GetBaseException().Message, nameof(ChangeActivity),
-                Resource.ACTIVITY_CHANGE_ERROR, Resource.ACTIVITY_CHANGE_ERROR_TITLE);
+            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
         }
     }
 
@@ -155,42 +157,17 @@ public partial class MainVM : ObservableObject
     {
         try
         {
-            var closeSessionConfirmation = ConfirmCloseSession();
-            var isLunchStatusIndex = CurrentStatusIndex == (int)SharedStatus.Lunch;
+            var closeSessionConfirmation = DialogBox.Show(Resource.CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question);
 
-            if (!closeSessionConfirmation && isLunchStatusIndex)
-            {
-                RevertToPreviousStatus();
-                return;
-            }
-            else if (!closeSessionConfirmation)
-            {
-                return;
-            }
-
-            if (isLunchStatusIndex)
-            {
-                await UpdateStatus(CurrentStatusIndex);
-                IsShuttingDown = true;
-            }
+            if (!closeSessionConfirmation) return;
 
             await HandleCloseSession();
-            if (IsShuttingDown)
-            {
-                Application.Current.Shutdown();
-            }
-            else
-            {
-                RestartApp();
-            }
+            App.Restart();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            HandleException(ex.GetBaseException().Message,
-                nameof(CloseSession),
-                Resource.UNKNOWN_ERROR, Resource.UNKNOWN_ERROR_TITLE);
-
-            RestartApp();
+            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
+            App.Restart();
         }
         finally
         {
@@ -219,7 +196,7 @@ public partial class MainVM : ObservableObject
                     {
                         loadingService.Show("El adaptador o cable de red estuvo desconectado por mucho tiempo. Reiniciando applicación.");
                         logEntry.LogMessage = "The network adapter has been down for too long. Restarting app.";
-                        RestartApp();
+                        App.Restart();
                         return;
                     }
                 }
@@ -284,10 +261,9 @@ public partial class MainVM : ObservableObject
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            HandleException(Resource.UNKNOWN_ERROR, nameof(GeneralTimerTick),
-                ex.GetBaseException().Message, Resource.UNKNOWN_ERROR_TITLE);
+            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
         }
     }
 
@@ -322,6 +298,8 @@ public partial class MainVM : ObservableObject
 
     private async Task UpdateStatus(int newStatusIndex)
     {
+        logEntry.MethodName = nameof(UpdateStatus);
+
         try
         {
             if (newStatusIndex != (int)SharedStatus.Lunch)
@@ -335,10 +313,9 @@ public partial class MainVM : ObservableObject
             activityIdleTimeSeconds = activity.IdleTime * 60;
 
             logEntry.LogMessage = $"Cambiando a actividad de {activity.Description}";
-            logEntry.MethodName = nameof(UpdateStatus);
 
             logService.Log(logEntry);
-            ResetActivityTimer();
+            activityTimeSpan = TimeSpan.Zero;
 
             var statusChange = new StatusHistoryChange
             {
@@ -360,17 +337,16 @@ public partial class MainVM : ObservableObject
         }
         catch (Exception exception)
         {
-            MessageBox.Show(exception.Message, "Error de actividad", MessageBoxButton.OK, MessageBoxImage.Error);
+            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
         }
     }
 
     private async Task HandleCloseSession()
     {
         loadingService.Show("Cerrando sesión, por favor espere...");
-        logService.Log(new LogEntry { LogMessage = "Cerrando sesión.", ClassName = nameof(MainVM) });
-
-        var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.LogHistory.Id);
-        if (HandleResponseErrors(updateSessionAliveDateResponse)) return;
+        logEntry.LogMessage = "Cerrando sesión.";
+        logEntry.MethodName = nameof(HandleCloseSession);
+        logService.Log(logEntry);
 
         var sessionLogOutData = new SessionLogOutData
         {
@@ -379,28 +355,41 @@ public partial class MainVM : ObservableObject
         };
 
         var closeSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
+
         if (HandleResponseErrors(closeSessionResponse)) return;
 
-        logService.Log(new LogEntry { LogMessage = "Sesión cerrada.", ClassName = nameof(MainVM) });
+        logEntry.LogMessage = "Sesión cerrada.";
+        logService.Log(logEntry);
     }
 
     private bool HandleResponseErrors(BaseResponse baseResponse)
     {
+        logEntry.MethodName = nameof(HandleCloseSession);
+
         if (baseResponse.IsSessionAlreadyClose)
         {
-            DialogBox.Show(Resource.CLOSE_SESSION, Resource.CLOSE_SESSION_TITLE);
-            RestartApp();
+            logEntry.LogMessage = Resource.SESSION_ALREADY_CLOSED;
+            logService.Log(logEntry);
+            DialogBox.Show(Resource.SESSION_ALREADY_CLOSED, Resource.SESSION_ALREADY_CLOSED_TITLE);
+            App.Restart();
             return true;
         }
 
         if (baseResponse.HasError)
         {
+            logEntry.LogMessage = baseResponse.Message;
+            logService.Log(logEntry);
+
             sessionTimer.Stop();
             activityTimer.Stop();
 
-            var retry = ShowError(Resource.RETRY_CLOSE_SESSION, Resource.RETRY_CLOSE_SESSION_TITLE);
+            var retry = DialogBox.Show(Resource.RETRY_CLOSE_SESSION, Resource.RETRY_CLOSE_SESSION_TITLE);
             if (!retry)
-                RestartApp();
+                App.Restart();
+            else
+            {
+                HandleCloseSession().ConfigureAwait(false);
+            }
 
             return true;
         }
@@ -408,44 +397,13 @@ public partial class MainVM : ObservableObject
         return false;
     }
 
-
-    private bool ConfirmCloseSession()
+    private void HandleException(string errorMessage, string methodName)
     {
-        var action = IsShuttingDown ? "salir de la aplicación" : "reiniciar la aplicación";
-        var prompt = CurrentStatusIndex != (int)SharedStatus.Lunch
-            ? $"¿Seguro que deseas cerrar la sesión y {action}?"
-            : "El estado de Lunch terminará la sesión y cerrará la aplicación. ¿Seguro que deseas continuar?";
-
-        return ShowConfirmation(prompt, "LogTime - Cierre de sesión");
+        logEntry.LogMessage += errorMessage;
+        logEntry.MethodName += methodName;
+        logService.Log(logEntry);
+        DialogBox.Show(Resource.UNKNOWN_ERROR, Resource.UNKNOWN_ERROR_TITLE, alertType: AlertType.Error);
     }
-
-    private void HandleException(string showMessage, string methodName, string errorMessage, string title)
-    {
-        logService.Log(new LogEntry { LogMessage = showMessage, MethodName = methodName });
-        ShowError(errorMessage, title);
-    }
-
-    private static bool ShowBreakWarning() => ShowConfirmation(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE);
-
-    private void RevertToPreviousStatus() => CurrentStatusIndex = _previousStatusId;
-
-    public void RestartApp()
-    {
-        IsRestarting = true;
-        IsShuttingDown = false;
-        App.Restart();
-    }
-
-    private void ResetActivityTimer() => activityTimeSpan = TimeSpan.Zero;
-
-    private static bool ShowConfirmation(string message, string title)
-        => MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
-
-    private static void ShowInfo(string message, string title)
-        => MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
-
-    private static bool ShowError(string message, string title)
-        => MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.Yes;
 
     private bool IsEarlyBreakChange()
         => (_previousStatusId == (int)SharedStatus.Break && activityTimeSpan.Minutes < Constants.MinimumBreakDurationMinutes)

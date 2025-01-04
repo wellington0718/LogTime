@@ -79,6 +79,15 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LogTime es una aplicación de registro de tiempo diseñada para monitorear y gestionar el tiempo que los agentes pasan logueados, así como las actividades seleccionadas durante sus sesiones..
+        /// </summary>
+        internal static string APP_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("APP_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LogTime - Error de autenticación.
         /// </summary>
         internal static string AUTH_ERROR_TITLE {
@@ -88,20 +97,20 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to La sesión ya había sido cerrada por alguien más o por un servicio..
+        ///   Looks up a localized string similar to ¿Seguro que deseas cerrar la sesión y reiniciar la aplicación?.
         /// </summary>
-        internal static string CLOSE_SESSION {
+        internal static string CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION {
             get {
-                return ResourceManager.GetString("CLOSE_SESSION", resourceCulture);
+                return ResourceManager.GetString("CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to LogTime - Sesión cerrada.
+        ///   Looks up a localized string similar to © Copyright {0}, Synergies Corps. {1} Todos los derechos reservados..
         /// </summary>
-        internal static string CLOSE_SESSION_TITLE {
+        internal static string COPY_RIGHT {
             get {
-                return ResourceManager.GetString("CLOSE_SESSION_TITLE", resourceCulture);
+                return ResourceManager.GetString("COPY_RIGHT", resourceCulture);
             }
         }
         
@@ -160,6 +169,15 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to El estado de Lunch terminará la sesión y cerrará la aplicación. ¿Seguro que deseas continuar?.
+        /// </summary>
+        internal static string LUNCH_CONFIRMATION {
+            get {
+                return ResourceManager.GetString("LUNCH_CONFIRMATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ya existe una sesión iniciada con el usuario {0} en la PC {1} ¿Deseas continuar para cerrar esa sesión?.
         /// </summary>
         internal static string OPEN_SESSION_MESSAGE {
@@ -210,6 +228,24 @@ namespace LogTime.Properties {
         internal static string RETRY_CLOSE_SESSION_TITLE {
             get {
                 return ResourceManager.GetString("RETRY_CLOSE_SESSION_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to La sesión ya había sido cerrada por alguien más o por un servicio..
+        /// </summary>
+        internal static string SESSION_ALREADY_CLOSED {
+            get {
+                return ResourceManager.GetString("SESSION_ALREADY_CLOSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Sesión cerrada.
+        /// </summary>
+        internal static string SESSION_ALREADY_CLOSED_TITLE {
+            get {
+                return ResourceManager.GetString("SESSION_ALREADY_CLOSED_TITLE", resourceCulture);
             }
         }
         

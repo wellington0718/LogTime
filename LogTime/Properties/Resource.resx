@@ -123,14 +123,20 @@
   <data name="ACTIVITY_CHANGE_ERROR_TITLE" xml:space="preserve">
     <value>LogTime - Error al cambiar de actividad</value>
   </data>
+  <data name="APP_DESCRIPTION" xml:space="preserve">
+    <value>LogTime es una aplicación de registro de tiempo diseñada para monitorear y gestionar el tiempo que los agentes pasan logueados, así como las actividades seleccionadas durante sus sesiones.</value>
+  </data>
   <data name="AUTH_ERROR_TITLE" xml:space="preserve">
     <value>LogTime - Error de autenticación</value>
   </data>
-  <data name="CLOSE_SESSION" xml:space="preserve">
+  <data name="SESSION_ALREADY_CLOSED" xml:space="preserve">
     <value>La sesión ya había sido cerrada por alguien más o por un servicio.</value>
   </data>
-  <data name="CLOSE_SESSION_TITLE" xml:space="preserve">
+  <data name="SESSION_ALREADY_CLOSED_TITLE" xml:space="preserve">
     <value>LogTime - Sesión cerrada</value>
+  </data>
+  <data name="COPY_RIGHT" xml:space="preserve">
+    <value>© Copyright {0}, Synergies Corps. {1} Todos los derechos reservados.</value>
   </data>
   <data name="CREDENTIALS_ERROR" xml:space="preserve">
     <value>Las credenciales no son validas.</value>
@@ -173,5 +179,11 @@
   </data>
   <data name="UNKNOWN_ERROR_TITLE" xml:space="preserve">
     <value>LogTime - Error desconocido</value>
+  </data>
+  <data name="LUNCH_CONFIRMATION" xml:space="preserve">
+    <value>El estado de Lunch terminará la sesión y cerrará la aplicación. ¿Seguro que deseas continuar?</value>
+  </data>
+  <data name="CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION" xml:space="preserve">
+    <value>¿Seguro que deseas cerrar la sesión y reiniciar la aplicación?</value>
   </data>
 </root>

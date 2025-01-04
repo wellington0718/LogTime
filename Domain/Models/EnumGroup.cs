@@ -33,5 +33,6 @@ public enum AlertType
 {
     Info,
     Warning,
-    Error
+    Error,
+    Question
 }

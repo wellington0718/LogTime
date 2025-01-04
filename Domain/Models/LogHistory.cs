@@ -10,4 +10,7 @@ public class LogHistory
     public DateTime? LogoutDate { get; set; }
     public string LogedOutBy { get; set; }
     public string ClientVersion { get; set; }
+
+    public ICollection<ActiveLog> ActiveLogs { get; set; } = [];
+    public ICollection<StatusHistory> StatusHistories { get; set; } = [];
 }

@@ -4,7 +4,7 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
-    <AssemblyVersion>3.1.0</AssemblyVersion>
+    <AssemblyVersion>3.0.0</AssemblyVersion>
     <Runtime>net9.0</Runtime>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

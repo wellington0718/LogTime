@@ -7,4 +7,5 @@ public class StatusHistory
     public DateTime StatusStartTime { get; set; }
     public DateTime? StatusEndTime { get; set; }
     public int StatusId { get; set; }
+    public LogHistory LogHistory { get; set; }
 }

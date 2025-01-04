@@ -1,3 +1,5 @@
+using Domain.Models;
+
 namespace LogTime.Api.Controllers;
 
 [ApiController]
@@ -10,13 +12,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            var sessionLogOutData = new SessionLogOutData()
-            {
-                LoggedOutBy = clientData.LoggedOutBy,
-                UserIds = clientData.User
-            };
-
-            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(sessionLogOutData);
+            await logTimeUnitOfWork.CloseActiveSessionsAsync(clientData.LoggedOutBy, clientData.User);
             var newSessionData = await logTimeUnitOfWork.ActiveLogRepository.CreateNewSessionAsync(clientData);
             await logTimeUnitOfWork.CommitAsync();
 
@@ -39,14 +35,8 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            await logTimeUnitOfWork.ActiveLogRepository.CloseActiveSessionsAsync(sessionLogOutData);
-            await logTimeUnitOfWork.CommitAsync();
-
-            return CreateResponse(new BaseResponse
-            {
-                Code = StatusCodes.Status200OK,
-                Message = nameof(StatusMessage.Success),
-            });
+            var baseResponse = await logTimeUnitOfWork.CloseActiveSessionsAsync(sessionLogOutData.LoggedOutBy, sessionLogOutData.UserIds);
+            return CreateResponse(baseResponse);
         }
         catch (Exception exception)
         {
@@ -65,28 +55,8 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            var logHistory = await logTimeUnitOfWork.LogHistoryRepository.FindAsync(logHistoryId);
-
-            if (logHistory.LogoutDate.HasValue)
-            {
-                await logTimeUnitOfWork.ActiveLogRepository.DeleteAsync(logHistory => logHistory.Id == logHistoryId);
-                await logTimeUnitOfWork.SaveChangesAsync();
-                await logTimeUnitOfWork.CommitAsync();
-                return CreateResponse(new BaseResponse
-                {
-                    Code = StatusCodes.Status200OK,
-                    Title = nameof(StatusMessage.Ok),
-                    IsSessionAlreadyClose = true,
-                    Message = nameof(StatusMessage.Success)
-                });
-            }
-
-            logHistory.LastTimeConnectionAlive = DateTime.Now;
-            logTimeUnitOfWork.LogHistoryRepository.Update(logHistory);
-            await logTimeUnitOfWork.SaveChangesAsync();
-            await logTimeUnitOfWork.CommitAsync();
-
-            return CreateResponse(new SessionAliveDate { LastDate = logHistory.LastTimeConnectionAlive });
+            var updateLogHistoryResponse = await logTimeUnitOfWork.UpdateLogHistoyAsync(logHistoryId);
+            return CreateResponse(updateLogHistoryResponse);
         }
         catch (Exception exception)
         {
@@ -105,13 +75,8 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            var foundLogHistory = await logTimeUnitOfWork.LogHistoryRepository.FindAsync(logHistory => logHistory.IdUser.Equals(userId) && logHistory.LogoutDate == null);
-
-            var response = foundLogHistory == null
-                ? new FetchSessionData { IsAlreadyOpened = false, IsSessionAlreadyClose = true }
-                : new FetchSessionData { IsAlreadyOpened = true, CurrentRemoteHost = foundLogHistory.Hostname };
-
-            return CreateResponse(response);
+            var fetchActiveSessionResponse = await logTimeUnitOfWork.FetchActiveSessionAsync(userId);
+            return CreateResponse(fetchActiveSessionResponse);
 
         }
         catch (Exception exception)
@@ -131,41 +96,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
     {
         try
         {
-            var userExists = await logTimeUnitOfWork.UserRepository.ValidateCredentialsAsync(clientData.User, clientData.Password);
-
-            if (!userExists)
-            {
-                return CreateResponse(new BaseResponse
-                {
-                    HasError = false,
-                    Code = StatusCodes.Status401Unauthorized,
-                    Title = nameof(StatusMessage.Unauthorized),
-                    Message = nameof(StatusMessage.Success),
-                });
-            }
-            //else
-            //{
-            //    var isNotAllowed = await logTimeUnitOfWork.UserRepository.IsUserNotAllowedAsync(clientData.User);
-
-            //    if (isNotAllowed)
-            //    {
-            //        return CreateResponse(new BaseResponse
-            //        {
-            //            HasError = true,
-            //            Code = StatusCodes.Status401Unauthorized,
-            //            Title = nameof(StatusMessage.NotAllowed),
-            //            Message = nameof(StatusMessage.Success)
-            //        });
-            //    }
-            //}
-
-            return CreateResponse(new BaseResponse
-            {
-                HasError = false,
-                Code = StatusCodes.Status200OK,
-                Title = nameof(StatusMessage.Ok),
-                Message = nameof(StatusMessage.Success)
-            });
+            var validateCredentialResponse = await logTimeUnitOfWork.ValidateCredentialsAsync(clientData.User, clientData.Password);
+            return CreateResponse(validateCredentialResponse);
+            
         }
         catch (Exception exception)
         {

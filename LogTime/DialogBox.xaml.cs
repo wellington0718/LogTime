@@ -20,11 +20,11 @@ public partial class DialogBox : Window
         ImageSource = GetImageSource(alertType);
     }
 
-    public static MessageBoxResult Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.Ok, AlertType alertType = AlertType.Info)
+    public static bool Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.Ok, AlertType alertType = AlertType.Info)
     {
         var messageBox = new DialogBox(caption, message, buttonGroup, alertType);
         messageBox.ShowDialog();
-        return messageBox.Result;
+        return  messageBox.Result == MessageBoxResult.Yes || messageBox.Result == MessageBoxResult.OK;
     }
 
     private static string GetImageSource(AlertType alertType)

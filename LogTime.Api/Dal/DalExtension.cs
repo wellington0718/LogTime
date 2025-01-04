@@ -1,4 +1,6 @@
-﻿namespace LogTime.Api.Dal;
+﻿using LogTime.Api.Services;
+
+namespace LogTime.Api.Dal;
 
 public static class DalExtension
 {
@@ -9,6 +11,7 @@ public static class DalExtension
         services.AddScoped<IStatusHistoryRepository, StatusHistoryRepository>();
         services.AddScoped<IActiveLogRepository, ActiveLogRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IActiveSessionService, ActiveSessionService>();
 
         return services;
     }
