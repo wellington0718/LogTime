@@ -6,16 +6,15 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:LogTime"
         mc:Ignorable="d"
-        ThemeMode="Dark"
         Title="Acerca de LogTime" 
         ResizeMode="NoResize"
         Topmost="True"
         Height="250" 
-        Width="400"
+        Width="360"
         WindowStartupLocation="CenterOwner">
 
-    <Grid>
-        <StackPanel Margin="20, 8">
+    <Grid Background="#333">
+        <StackPanel Margin="20, 8" >
             <!-- Title Section -->
             <StackPanel HorizontalAlignment="Center">
                 <TextBlock FontSize="18" 
@@ -53,7 +52,7 @@
         <Border Background="#E6E6E6" Height="40" VerticalAlignment="Bottom" BorderBrush="#CCCCCC" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0">
                 <!-- Hyperlink -->
-                <TextBlock FontFamily="Montserrat" Margin="10, 5, 70, 0" FontSize="12" Foreground="#0065B1">
+                <TextBlock FontFamily="Montserrat" Margin="0, 9, 25, 0" FontSize="12" Foreground="#0065B1">
                 <Hyperlink NavigateUri="http://intranet/SynergiesSystem/LogTime" RequestNavigate="NavigateToUrl">
                     Visitar la página oficial de la aplicación
                 </Hyperlink>
@@ -61,16 +60,11 @@
 
                 <!-- Button -->
                 <Button Content="Cerrar" Width="80" 
-                    Margin="0, 0, 10, 0" 
                     Click="CloseButton_Click" 
-                    HorizontalAlignment="Left"
-                    Background="#0065B1" 
-                    Foreground="White"
-                    BorderBrush="#0065B1"
-                    BorderThickness="1"
+                    Height="30"
+                    Style="{DynamicResource PrimaryButtonStyle}"
                     Padding="5"
-                    FontWeight="Bold"
-                    VerticalAlignment="Center" />
+                    FontWeight="Bold"/>
             </StackPanel>
         </Border>
     </Grid>

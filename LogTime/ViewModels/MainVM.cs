@@ -13,15 +13,14 @@ public partial class MainVM : ObservableObject
     [ObservableProperty]
     private int currentStatusIndex;
 
-    private readonly DispatcherTimer sessionTimer = new() { Interval = TimeSpan.FromSeconds(1) };
-    private readonly DispatcherTimer activityTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly DispatcherTimer generalTimer;
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
-    private TimeSpan sessionTimeSpan = new();
-    private TimeSpan activityTimeSpan = new();
-    private TimeSpan idleTimeSpan = new();
-    private int _previousStatusId;
+    private TimeSpan sessionTimeSpan;
+    private TimeSpan activityTimeSpan;
+    private TimeSpan idleTimeSpan;
+    private int previousStatusId;
     private int? activityIdleTimeSeconds;
     private readonly LogEntry logEntry;
     private bool networkWasAlive;
@@ -29,34 +28,29 @@ public partial class MainVM : ObservableObject
     private bool isPcLocked;
     private bool isScreenSaverRunning;
     private bool screenSaverLastState;
+    private bool canHandleStatusChange = true;
 
     public SessionData SessionData { get; }
 
-    public MainVM()
+    public MainVM(ILogService logService, ILogTimeApiClient logTimeApiClient, ILoadingService loadingService)
     {
-        var app = (App)Application.Current;
+        var loginDateTime = GlobalData.SessionData.LogHistory.LoginDate;
+        generalTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+        this.logService = logService;
+        this.logTimeApiClient = logTimeApiClient;
+        this.loadingService = loadingService;
         SystemEvents.SessionSwitch += SystemEventsSessionSwitch;
         SystemEvents.SessionEnded += LoggingOff;
         networkWasAlive = true;
         SessionData = GlobalData.SessionData;
-        var loginDateTime = GlobalData.SessionData.LogHistory.LoginDate;
         serverConnection = loginDateTime.ToString("yyyy-MM-dd HH:mm:ss");
         loginDate = serverConnection;
         currentStatusIndex = (int)SharedStatus.NoActivity;
-        _previousStatusId = currentStatusIndex;
-        activityIdleTimeSeconds = 1; //SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
-        sessionTimer.Tick += (s, e) => GeneralTimerTick(nameof(SessionTime)).ConfigureAwait(false);
-        activityTimer.Tick += (s, e) => GeneralTimerTick(nameof(ActivityTime)).ConfigureAwait(false);
-        sessionTimer.Start();
-        activityTimer.Start();
-        logService = app.ServiceProvider.GetRequiredService<ILogService>();
-        logTimeApiClient = app.ServiceProvider.GetRequiredService<ILogTimeApiClient>();
-        loadingService = app.ServiceProvider.GetRequiredService<ILoadingService>();
-        logEntry = new LogEntry
-        {
-            ClassName = nameof(MainVM),
-            UserId = SessionData.User?.Id,
-        };
+        previousStatusId = currentStatusIndex;
+        activityIdleTimeSeconds = SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
+        logEntry = new LogEntry { ClassName = nameof(MainVM), UserId = SessionData.User?.Id, };
+        generalTimer.Tick += GeneralTimerTick;
+        generalTimer.Start();
     }
 
     [DllImport("Sensapi")]
@@ -84,36 +78,46 @@ public partial class MainVM : ObservableObject
         return isScreenSaverRunning;
     }
 
-    public async Task ChangeActivity()
+    [RelayCommand]
+    public async Task ChangeActivity(Status selectedStatus)
     {
         try
         {
-            if (IsEarlyBreakChange() && !DialogBox.Show(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE))
+            var selectedStatusIndex = SessionData.User.Project.Statuses.ToList().IndexOf(selectedStatus);
+            previousStatusId = CurrentStatusIndex;
+
+            if (IsEarlyBreakChange(selectedStatusIndex))
             {
-                CurrentStatusIndex = _previousStatusId;
-                return;
+                canHandleStatusChange = ConfirmEarlyBreakChange();
+
+                if (!canHandleStatusChange)
+                {
+                    RevertToPrevoiusStatus();
+                    canHandleStatusChange = false;
+                    return;
+                }
             }
 
-            if (CurrentStatusIndex == (int)SharedStatus.Lunch)
+            if (selectedStatusIndex == (int)SharedStatus.Lunch)
             {
-                if (!DialogBox.Show(Resource.LUNCH_CONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question))
+                canHandleStatusChange = ConfirmLunchChange();
+                if (!canHandleStatusChange)
                 {
-                    CurrentStatusIndex = _previousStatusId;
+                    RevertToPrevoiusStatus();
                     return;
                 }
 
-                await UpdateStatus(CurrentStatusIndex);
-                await HandleCloseSession();
-                Application.Current.Shutdown();
+                await HandleLunchSessionClose(selectedStatus);
             }
-            else
+
+            if (canHandleStatusChange)
             {
-                await UpdateStatus(CurrentStatusIndex);
+                await HandleStatusChange(selectedStatus, selectedStatusIndex);
             }
         }
         catch (Exception exception)
         {
-            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
+            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
         }
     }
 
@@ -153,20 +157,27 @@ public partial class MainVM : ObservableObject
     }
 
     [RelayCommand]
-    public async Task CloseSession()
+    public async Task CloseSession(string shutDown)
     {
         try
         {
-            var closeSessionConfirmation = DialogBox.Show(Resource.CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question);
+            var isShutDown = !string.IsNullOrEmpty(shutDown);
+            var action = isShutDown? "salir la aplicación" : "reiniciar la aplicación";
+            var closeSessionConfirmation = DialogBox.Show(string.Format(Resource.CLOSE_SESSION_ACONFIRMATION, action),
+                Resource.CLOSE_SESSION_CONFIRMATION_TITLE, DialogBoxButton.YesNo, AlertType.Question);
 
             if (!closeSessionConfirmation) return;
 
             await HandleCloseSession();
-            App.Restart();
+
+            if (!string.IsNullOrEmpty(shutDown))
+                Application.Current.Shutdown();
+            else
+                App.Restart();
         }
         catch (Exception exception)
         {
-            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
+            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
             App.Restart();
         }
         finally
@@ -175,7 +186,10 @@ public partial class MainVM : ObservableObject
         }
     }
 
-    private async Task GeneralTimerTick(string propertyName)
+    [RelayCommand]
+    public async Task RefreshServerConnection() => await UpdateSessionAliveDateAsync(true);
+
+    private async void GeneralTimerTick(object? sender, EventArgs e)
     {
         try
         {
@@ -232,38 +246,44 @@ public partial class MainVM : ObservableObject
                         loadingService.Show("Cerrando sesión debido a que el tiempo de inactividad fue exedido.");
                         var sessionLogOutData = new SessionLogOutData
                         {
-                            Id = SessionData.ActiveLog.ActualLogHistoryId,
+                            UserIds = SessionData.ActiveLog.UserId,
                             LoggedOutBy = "Auto-logout: Idle time"
                         };
 
                         var CloseSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
-                        HandleResponseErrors(CloseSessionResponse);
-                    }
+                        var hasError = HandleResponseErrors(CloseSessionResponse);
+                        loadingService.Close();
+                        generalTimer.Stop();
 
+                        if (!hasError)
+                        {
+                            var result = DialogBox.Show("La sesión fue cerrada debido a que el tiempo de inactividad fue exedido", "LogTime - Tiempo de inactividad", alertType: AlertType.Info);
+                            App.Restart();
+                        }
+                    }
                 }
                 else
                 {
                     idleTimeSpan = TimeSpan.Zero;
                 }
 
-                switch (propertyName)
-                {
-                    case nameof(SessionTime):
-                        sessionTimeSpan = sessionTimeSpan.Add(TimeSpan.FromSeconds(1));
-                        SessionTime = sessionTimeSpan.ToString(@"hh\:mm\:ss");
-                        await UpdateSessionAliveDateAsync();
-                        await CloseSessionByUserGroupLogOutTimeReached();
-                        break;
-                    case nameof(ActivityTime):
-                        activityTimeSpan = activityTimeSpan.Add(TimeSpan.FromSeconds(1));
-                        ActivityTime = activityTimeSpan.ToString(@"hh\:mm\:ss"); ;
-                        break;
-                }
+                sessionTimeSpan = sessionTimeSpan.Add(TimeSpan.FromSeconds(1));
+                SessionTime = sessionTimeSpan.ToString(@"hh\:mm\:ss");
+                await UpdateSessionAliveDateAsync(false);
+                await CloseSessionByUserGroupLogOutTimeReached();
+
+                activityTimeSpan = activityTimeSpan.Add(TimeSpan.FromSeconds(1));
+                ActivityTime = activityTimeSpan.ToString(@"hh\:mm\:ss"); ;
             }
         }
         catch (Exception exception)
         {
-            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
+            loadingService.Close();
+            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
+        }
+        finally
+        {
+            loadingService.Close();
         }
     }
 
@@ -284,9 +304,9 @@ public partial class MainVM : ObservableObject
         }
     }
 
-    private async Task UpdateSessionAliveDateAsync()
+    private async Task UpdateSessionAliveDateAsync(bool isRefreshing)
     {
-        if (sessionTimeSpan.Minutes % 1 == 0 && sessionTimeSpan.Seconds == 0)
+        if (sessionTimeSpan.Minutes % 1 == 0 && sessionTimeSpan.Seconds == 0 || isRefreshing)
         {
             var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.ActiveLog.ActualLogHistoryId);
             var hasResponseErros = HandleResponseErrors(updateSessionAliveDateResponse);
@@ -296,48 +316,37 @@ public partial class MainVM : ObservableObject
         }
     }
 
-    private async Task UpdateStatus(int newStatusIndex)
+    private async Task HandleStatusChange(Status selectedStatus, int selectedStatusIndex)
     {
-        logEntry.MethodName = nameof(UpdateStatus);
-
         try
         {
-            if (newStatusIndex != (int)SharedStatus.Lunch)
-                if (CurrentStatusIndex != _previousStatusId && newStatusIndex != (int)SharedStatus.Lunch)
-                    loadingService.Show("Cambiando de actividad, por favor espere...");
+            logEntry.MethodName = nameof(HandleStatusChange);
 
-
-            CurrentStatusIndex = newStatusIndex;
-            _previousStatusId = CurrentStatusIndex;
-            var activity = GlobalData.SessionData.User.Project.Statuses.ToList()[newStatusIndex];
-            activityIdleTimeSeconds = activity.IdleTime * 60;
-
-            logEntry.LogMessage = $"Cambiando a actividad de {activity.Description}";
-
+            loadingService.Show("Cambiando de actividad, por favor espere...");
+            activityIdleTimeSeconds = selectedStatus.IdleTime * 60;
+            logEntry.LogMessage = $"Cambiando a actividad de {selectedStatus.Description}";
             logService.Log(logEntry);
-            activityTimeSpan = TimeSpan.Zero;
 
             var statusChange = new StatusHistoryChange
             {
                 Id = SessionData.ActiveLog.ActualStatusHistoryId,
-                NewActivityId = activity.Id,
+                NewActivityId = selectedStatus.Id,
             };
 
             var statusHistoryChangeResponse = await logTimeApiClient.ChangeActivityAsync(statusChange);
+
+            if (HandleResponseErrors(statusHistoryChangeResponse))
+                return;
+
+            CurrentStatusIndex = selectedStatusIndex;
             SessionData.ActiveLog.ActualStatusHistoryId = statusHistoryChangeResponse.Id;
-
-            if (HandleResponseErrors(statusHistoryChangeResponse))
-                return;
-
-            if (HandleResponseErrors(statusHistoryChangeResponse))
-                return;
-
             ServerConnection = statusHistoryChangeResponse.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
+            activityTimeSpan = TimeSpan.Zero;
             loadingService.Close();
         }
         catch (Exception exception)
         {
-            HandleException(exception.GetBaseException().Message, nameof(UpdateStatus));
+            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
         }
     }
 
@@ -379,9 +388,7 @@ public partial class MainVM : ObservableObject
         {
             logEntry.LogMessage = baseResponse.Message;
             logService.Log(logEntry);
-
-            sessionTimer.Stop();
-            activityTimer.Stop();
+            generalTimer.Stop();
 
             var retry = DialogBox.Show(Resource.RETRY_CLOSE_SESSION, Resource.RETRY_CLOSE_SESSION_TITLE);
             if (!retry)
@@ -405,8 +412,21 @@ public partial class MainVM : ObservableObject
         DialogBox.Show(Resource.UNKNOWN_ERROR, Resource.UNKNOWN_ERROR_TITLE, alertType: AlertType.Error);
     }
 
-    private bool IsEarlyBreakChange()
-        => (_previousStatusId == (int)SharedStatus.Break && activityTimeSpan.Minutes < Constants.MinimumBreakDurationMinutes)
-               && CurrentStatusIndex != (int)SharedStatus.Break;
-}
+    private void RevertToPrevoiusStatus() => CurrentStatusIndex = previousStatusId;
 
+    private static bool ConfirmEarlyBreakChange() =>
+         DialogBox.Show(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE, DialogBoxButton.YesNo);
+
+    private static bool ConfirmLunchChange() =>
+         DialogBox.Show(Resource.LUNCH_CONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question);
+
+    private async Task HandleLunchSessionClose(Status selectedStatus)
+    {
+        await HandleStatusChange(selectedStatus, (int)SharedStatus.Lunch);
+        await HandleCloseSession();
+        Application.Current.Shutdown();
+    }
+    private bool IsEarlyBreakChange(int selectedStatusIndex) => !(previousStatusId != (int)SharedStatus.Break
+        || activityTimeSpan.Minutes >= Constants.MinimumBreakDurationMinutes
+        || selectedStatusIndex == (int)SharedStatus.Break);
+}

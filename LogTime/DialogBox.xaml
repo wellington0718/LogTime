@@ -10,11 +10,11 @@
         AllowsTransparency="True"
         Topmost="True"
         WindowStyle="None" ResizeMode="NoResize"
-        Width="400" MinHeight="180" MaxHeight="200"
+        Width="350" MinHeight="180" MaxHeight="200"
         WindowStartupLocation="CenterOwner">
 
 
-    <Border CornerRadius="8" Background="#323232">
+    <Border CornerRadius="8" Background="#FFF">
         <Grid >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -23,9 +23,11 @@
             </Grid.RowDefinitions>
 
             <!-- Title -->
-            <TextBlock Text="{Binding Caption}" FontSize="16" FontWeight="Bold" 
-                Grid.Row="0" Padding="10, 5" Foreground="White" Background="#202020"/>
+            <Border Background="#0065B1" CornerRadius="8, 8, 0, 0">
+                <TextBlock Text="{Binding Caption}" FontSize="16" FontWeight="Bold" 
+                           Grid.Row="0" Padding="10, 5" Foreground="White" />
 
+            </Border>
             <!-- Message with Image -->
             <Grid Grid.Row="1" Margin="10, 20, 0, 0">
                 <Grid.ColumnDefinitions>
@@ -35,7 +37,7 @@
 
                 <Image Source="{Binding ImageSource}" Width="30" Height="50" Margin="0,0,10,0" Grid.Column="0"/>
 
-                <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Foreground="White" TextWrapping="Wrap" Grid.Column="1" FontSize="14"/>
+                <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Foreground="#333" TextWrapping="Wrap" Grid.Column="1" FontSize="14"/>
             </Grid>
 
             <!-- Buttons -->

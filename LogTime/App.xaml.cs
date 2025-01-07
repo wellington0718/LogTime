@@ -2,12 +2,12 @@
 
 public partial class App : Application
 {
-    public IServiceProvider ServiceProvider { get; private set; }
+    public static IServiceProvider? ServiceProvider { get; private set; }
     public IConfiguration Configuration { get; private set; }
     private static readonly string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
     private static FtpService? _ftpService;
 
-    public Login LoginWindow { get; }
+    public static Window? CurrentWindow { get; set; }
 
     public App()
     {
@@ -19,7 +19,6 @@ public partial class App : Application
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection);
         ServiceProvider = serviceCollection.BuildServiceProvider();
-        LoginWindow = ServiceProvider.GetRequiredService<Login>();
         _ftpService = ServiceProvider.GetRequiredService<FtpService>();
     }
 
@@ -29,7 +28,7 @@ public partial class App : Application
         if (executablePath != null)
         {
             Process.Start(executablePath);
-            Current.Shutdown();
+            Current?.Shutdown();
         }
     }
 
@@ -71,10 +70,19 @@ public partial class App : Application
         }
     }
 
-    protected override void OnStartup(StartupEventArgs e)
+    public static void ShowWindow<T>() where T : Window
     {
-        LoginWindow.Show();
+        CurrentWindow = ServiceProvider!.GetRequiredService<T>();
+        CurrentWindow!.Show();
     }
+
+    public static void CloseWindow<T>() where T : Window
+    {
+        var window = Current.Windows.OfType<T>().FirstOrDefault(w => w.IsVisible);
+        window?.Close();
+    }
+
+    protected override void OnStartup(StartupEventArgs e) => ShowWindow<Login>();
 
     private void ConfigureServices(IServiceCollection services)
     {

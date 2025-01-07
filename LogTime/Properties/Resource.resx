@@ -183,7 +183,10 @@
   <data name="LUNCH_CONFIRMATION" xml:space="preserve">
     <value>El estado de Lunch terminará la sesión y cerrará la aplicación. ¿Seguro que deseas continuar?</value>
   </data>
-  <data name="CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION" xml:space="preserve">
-    <value>¿Seguro que deseas cerrar la sesión y reiniciar la aplicación?</value>
+  <data name="CLOSE_SESSION_ACONFIRMATION" xml:space="preserve">
+    <value>¿Seguro que deseas cerrar la sesión y {0}?</value>
+  </data>
+  <data name="CLOSE_SESSION_CONFIRMATION_TITLE" xml:space="preserve">
+    <value>LogTime - Cierre de sesión</value>
   </data>
 </root>

@@ -11,12 +11,18 @@ builder.Services.AddControllers()
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddScoped<ILogHistoryRepository, LogHistoryRepository>();
+builder.Services.AddScoped<ILogTimeUnitOfWork, LogTimeUnitOfWork>();
+builder.Services.AddScoped<IStatusHistoryRepository, StatusHistoryRepository>();
+builder.Services.AddScoped<IActiveLogRepository, ActiveLogRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddDbContext<LogTimeDataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString(nameof(ConnectionStringName.LogTime)));
 });
 
-builder.Services.AddRepository();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

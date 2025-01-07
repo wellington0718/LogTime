@@ -97,11 +97,20 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ¿Seguro que deseas cerrar la sesión y reiniciar la aplicación?.
+        ///   Looks up a localized string similar to ¿Seguro que deseas cerrar la sesión y {0}?.
         /// </summary>
-        internal static string CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION {
+        internal static string CLOSE_SESSION_ACONFIRMATION {
             get {
-                return ResourceManager.GetString("CLOSE_SESSION_AND_RESTART_APP_ACONFIRMATION", resourceCulture);
+                return ResourceManager.GetString("CLOSE_SESSION_ACONFIRMATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LogTime - Cierre de sesión.
+        /// </summary>
+        internal static string CLOSE_SESSION_CONFIRMATION_TITLE {
+            get {
+                return ResourceManager.GetString("CLOSE_SESSION_CONFIRMATION_TITLE", resourceCulture);
             }
         }
         

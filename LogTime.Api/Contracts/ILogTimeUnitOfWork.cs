@@ -10,7 +10,7 @@ public interface ILogTimeUnitOfWork
     Task<BaseResponse> UpdateLogHistoyAsync(int logHistoryId);
     Task<BaseResponse> FetchActiveSessionAsync(string userId);
     Task<BaseResponse> ValidateCredentialsAsync(string userId, string password);
-    Task<BaseResponse> ChangeStatusAsync(int newStatusId);
+    Task<BaseResponse> ChangeStatusAsync(int newActivityId, int currentStatusHistoryId);
     Task<bool> SaveChangesAsync();
     Task CommitAsync();
 }

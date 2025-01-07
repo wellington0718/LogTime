@@ -27,12 +27,12 @@ public class LoadingService : ILoadingService
 
             _viewModel!.Message = message;
 
-        }, System.Windows.Threading.DispatcherPriority.Render);
+        });
     }
 
     public void Close()
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current?.Dispatcher.Invoke(() =>
             {
                 if (_loading != null)
                 {
@@ -43,10 +43,5 @@ public class LoadingService : ILoadingService
                     _loading = null;
                 }
             });
-    }
-
-    public MessageBoxResult MessageBox(string message, string title, MessageBoxButton buttonType, MessageBoxImage messageImage)
-    {
-        return System.Windows.MessageBox.Show(message, title, buttonType, messageImage);
     }
 }

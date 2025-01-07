@@ -20,11 +20,11 @@ public partial class DialogBox : Window
         ImageSource = GetImageSource(alertType);
     }
 
-    public static bool Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.Ok, AlertType alertType = AlertType.Info)
+    public static bool Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.OK, AlertType alertType = AlertType.Info)
     {
         var messageBox = new DialogBox(caption, message, buttonGroup, alertType);
         messageBox.ShowDialog();
-        return  messageBox.Result == MessageBoxResult.Yes || messageBox.Result == MessageBoxResult.OK;
+        return messageBox.Result == MessageBoxResult.Yes || messageBox.Result == MessageBoxResult.OK;
     }
 
     private static string GetImageSource(AlertType alertType)
@@ -34,6 +34,7 @@ public partial class DialogBox : Window
             AlertType.Info => "Images/info.png",
             AlertType.Warning => "Images/warning.png",
             AlertType.Error => "Images/error.png",
+            AlertType.Question => "Images/question.png",
             _ => ""
         };
     }
@@ -44,7 +45,7 @@ public partial class DialogBox : Window
 
         switch (dialogBoxButton)
         {
-            case DialogBoxButton.Ok:
+            case DialogBoxButton.OK:
                 AddButton("OK", MessageBoxResult.OK);
                 break;
 
@@ -67,11 +68,15 @@ public partial class DialogBox : Window
 
     private void AddButton(string content, MessageBoxResult result)
     {
+        var style = content.Equals("OK") || content.Equals("Yes") ? "PrimaryButtonStyle" : "SecondaryButtonStyle";
+
         var button = new Button
         {
             Content = content,
             Width = 75,
+            Height = 30,
             Margin = new Thickness(5),
+            Style = (Style)FindResource(style),
             IsDefault = content == "OK" || content == "Yes", // Default action button
             IsCancel = content == "Cancel" || content == "No" // Cancel action button
         };

@@ -5,11 +5,11 @@
     public class StatusController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult> Change(StatusHistoryChange statusChange)
+        public async Task<ActionResult> Change(StatusHistoryChange statusHistoryChange)
         {
             try
             {
-                var changeStatusResponse = await logTimeUnitOfWork.ChangeStatusAsync(statusChange.Id);
+                var changeStatusResponse = await logTimeUnitOfWork.ChangeStatusAsync(statusHistoryChange.NewActivityId, statusHistoryChange.Id);
                 return CreateResponse(changeStatusResponse);
             }
             catch (Exception exception)

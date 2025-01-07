@@ -18,8 +18,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
     [RelayCommand]
     public async Task Login()
     {
-        var app = (App)Application.Current;
-
         UserId = UserId.Trim().PadLeft(8, '0');
 
         var logEntry = new LogEntry
@@ -33,13 +31,13 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
         try
         {
             logService.Log(logEntry);
-
+            
             if (!ValidateCredentialFormat())
             {
-                MessageBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, DialogBoxButton.OK, AlertType.Error);
                 return;
             }
-
+            
             logEntry.LogMessage = "Validando credenciales.";
             logService.Log(logEntry);
 
@@ -60,7 +58,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
             {
                 logEntry.LogMessage = Resource.CREDENTIALS_ERROR;
                 logService.Log(logEntry);
-                MessageBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, DialogBoxButton.OK, AlertType.Error);
                 return;
             }
             else if (validateCredData.Title.Equals(nameof(StatusMessage.NotAllowed)))
@@ -68,7 +66,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                 logEntry.LogMessage = Resource.RESTRICTED_ACCESS;
                 logService.Log(logEntry);
 
-                MessageBox.Show(Resource.RESTRICTED_ACCESS, Resource.RESTRICTED_ACCESS_TITLE, MessageBoxButton.OK, MessageBoxImage.Information);
+                DialogBox.Show(Resource.RESTRICTED_ACCESS, Resource.RESTRICTED_ACCESS_TITLE, DialogBoxButton.OK, AlertType.Info);
                 return;
             }
 
@@ -84,7 +82,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                 logEntry.LogMessage = fetchSessionData.Message;
                 logService.Log(logEntry);
 
-                MessageBox.Show(fetchSessionData.Message, fetchSessionData.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show(fetchSessionData.Message, fetchSessionData.Title, DialogBoxButton.OK, AlertType.Error);
             }
             else
             {
@@ -94,9 +92,9 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                     logService.Log(logEntry);
 
                     var message = string.Format(Resource.OPEN_SESSION_MESSAGE, UserId, fetchSessionData.CurrentRemoteHost);
-                    var result = MessageBox.Show(message, Resource.OPEN_SESSION_TITLE, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var dialogResult = DialogBox.Show(message, Resource.OPEN_SESSION_TITLE, DialogBoxButton.YesNo, AlertType.Warning);
 
-                    if (result == MessageBoxResult.Yes)
+                    if (dialogResult)
                     {
                         loadingService.Show("Iniciando sesión, por favor espere...");
                         logEntry.LogMessage = "El usuario decidio cerra la sesión activa.";
@@ -115,15 +113,14 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                             logService.Log(logEntry);
 
                             GlobalData.SessionData = newsessionData;
-                            MainWindow mainWindow = app.ServiceProvider.GetRequiredService<MainWindow>();
-                            mainWindow.Show();
-                            app.LoginWindow.Close();
+                            App.ShowWindow<MainWindow>();
+                            App.CloseWindow<Login>();
                         }
                         else
                         {
                             logEntry.LogMessage = newsessionData.Message;
                             logService.Log(logEntry);
-                            MessageBox.Show(newsessionData.Message, newsessionData.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                            DialogBox.Show(newsessionData.Message, newsessionData.Title, DialogBoxButton.OK, AlertType.Error);
                         }
                     }
                     else
@@ -147,9 +144,8 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                         GlobalData.SessionData = newsessionData;
 
                         GlobalData.SessionData = newsessionData;
-                        MainWindow mainWindow = app.ServiceProvider.GetRequiredService<MainWindow>();
-                        mainWindow.Show();
-                        app.LoginWindow.Close();
+                        App.ShowWindow<MainWindow>();
+                        App.CloseWindow<Login>();
                     }
                     else
                     {
@@ -157,7 +153,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                         logEntry.LogMessage = newsessionData.Message;
                         logService.Log(logEntry);
 
-                        MessageBox.Show(newsessionData.Message, newsessionData.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        DialogBox.Show(newsessionData.Message, newsessionData.Title, DialogBoxButton.OK, AlertType.Error);
                     }
                 }
             }
@@ -168,11 +164,10 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);
             var message = exception.Message;
-            MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            DialogBox.Show(message, "Error", DialogBoxButton.OK, AlertType.Error);
         }
         finally
         {
-            app.LoginWindow.IsEnabled = true;
             loadingService.Close();
         }
     }

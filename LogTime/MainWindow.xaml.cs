@@ -2,26 +2,27 @@
 
 public partial class MainWindow : Window
 {
-    private readonly MainVM _mainVM;
 
-    public MainWindow(MainVM mainVM, ILogService logService, FtpService ftpService)
+    public MainWindow(MainVM mainVM)
     {
-        InitializeComponent();
-        Application.Current.ThemeMode = ThemeMode.Dark;
-        Title = GlobalData.AppNameVersion;
-        _mainVM = mainVM;
-        DataContext = _mainVM;
+        try
+        {
+            InitializeComponent();
+            Application.Current.ThemeMode = ThemeMode.Dark;
+            Title = GlobalData.AppNameVersion;
+            DataContext = mainVM;
+            App.Update();
+        }
+        catch (Exception ex)
+        {
 
-        App.Update();
+        }
     }
 
     private void OpenFlyout(object sender, MouseButtonEventArgs e) => FlyoutPopup.IsOpen = true;
-
-    private async void ChangeActivity(object sender, EventArgs e) => await _mainVM.ChangeActivity();
-
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => DragMove();
     private void MinimizeWindow(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-
+    private void ShowHelpDialog(object sender, RoutedEventArgs e) => new HelpWindow().Show();
     private void NavigateToUrl(object sender, RoutedEventArgs e)
     {
         try
@@ -48,13 +49,6 @@ public partial class MainWindow : Window
             MessageBox.Show($"Failed to open browser: {ex.Message}");
         }
     }
-
-    private void ShowHelpDialog(object sender, RoutedEventArgs e)
-    {
-        var helpDialogWindow = new HelpWindow();
-        helpDialogWindow.Show();
-    }
-
     private void ShowLogsDialog(object sender, RoutedEventArgs e)
     {
 

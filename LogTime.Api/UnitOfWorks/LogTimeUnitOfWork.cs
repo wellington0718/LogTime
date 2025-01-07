@@ -13,6 +13,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
     public async Task<BaseResponse> CloseActiveSessionsAsync(string loggedOutBy, string userIds)
     {
         var userIdsList = string.IsNullOrEmpty(userIds) ? [] : userIds.Split(',').ToList();
+
         var logHistoryIdsByActiveLogs = ActiveLogRepository.GetQueryable()
                                        .Where(activeLog => userIdsList.Contains(activeLog.UserId))
                                        .Select(activeLog => activeLog.ActualLogHistoryId);
@@ -28,9 +29,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
             logHistories.ForEach(logHistory =>
             {
                 if (logHistory.LogoutDate.HasValue)
-                {
                     ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
-                }
             });
 
             await SaveChangesAsync();
@@ -52,9 +51,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
             logHistory.LogedOutBy = string.IsNullOrEmpty(loggedOutBy) ? "New session" : loggedOutBy;
 
             foreach (var statusHistory in logHistory.StatusHistories)
-            {
-                statusHistory.StatusEndTime = logHistory.LogoutDate;
-            }
+                statusHistory.StatusEndTime = logoutDate;
 
             StatusHistoryRepository.UpdateRange(logHistory.StatusHistories);
             ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
@@ -77,7 +74,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
 
         if (logHistory.LogoutDate.HasValue)
         {
-            await ActiveLogRepository.DeleteAsync(logHistory => logHistory.Id == logHistoryId);
+            ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
             await SaveChangesAsync();
             await CommitAsync();
 
@@ -109,9 +106,9 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         return fetchSessionData;
     }
 
-    public async Task<BaseResponse> ChangeStatusAsync(int newStatusId)
+    public async Task<BaseResponse> ChangeStatusAsync(int newActivityId, int currentStatusHistoryId)
     {
-        var currentStatusHistory = await StatusHistoryRepository.FindAsync(newStatusId);
+        var currentStatusHistory = await StatusHistoryRepository.FindAsync(currentStatusHistoryId);
         var currentActiveLog = await ActiveLogRepository.FindAsync(activeLog => activeLog.ActualStatusHistoryId == currentStatusHistory.Id);
 
         if (currentActiveLog == null)
@@ -147,10 +144,12 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         LogHistoryRepository.Update(logHistory);
         StatusHistoryRepository.Update(currentStatusHistory);
 
+        await SaveChangesAsync();
+
         var newStatusHistory = new StatusHistory
         {
             LogId = currentStatusHistory.LogId,
-            StatusId = newStatusId,
+            StatusId = newActivityId,
             StatusStartTime = currentDateTime
         };
 
@@ -175,7 +174,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
 
         return newStatusHistoryChange;
     }
-    
+
     public async Task<BaseResponse> ValidateCredentialsAsync(string userId, string password)
     {
         var userExists = await UserRepository.ValidateCredentialsAsync(userId, password);

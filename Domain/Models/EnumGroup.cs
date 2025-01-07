@@ -24,7 +24,7 @@ public enum SharedStatus
 public enum DialogBoxButton
 {
     YesNo,
-    Ok,
+    OK,
     OkCancel,
     RetryCancel
 }
