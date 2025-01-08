@@ -1,3 +1,5 @@
+using LogTime.Api.CustomExceptionHandler;
+
 namespace LogTime.Api.Controllers;
 
 [ApiController]
@@ -16,15 +18,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
 
             return CreateResponse(newSessionData);
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            return CreateResponse(new BaseResponse
-            {
-                HasError = true,
-                Code = StatusCodes.Status500InternalServerError,
-                Title = nameof(StatusMessage.Error),
-                Message = exception.GetBaseException().Message
-            });
+            throw LogTimeException.Throw(ex);
         }
     }
 
@@ -36,15 +32,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
             var baseResponse = await logTimeUnitOfWork.CloseActiveSessionsAsync(sessionLogOutData.LoggedOutBy, sessionLogOutData.UserIds);
             return CreateResponse(baseResponse);
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            return CreateResponse(new BaseResponse
-            {
-                HasError = true,
-                Code = StatusCodes.Status500InternalServerError,
-                Title = nameof(StatusMessage.Error),
-                Message = exception.GetBaseException().Message
-            });
+            throw LogTimeException.Throw(ex);
         }
     }
 
@@ -56,15 +46,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
             var updateLogHistoryResponse = await logTimeUnitOfWork.UpdateLogHistoyAsync(logHistoryId);
             return CreateResponse(updateLogHistoryResponse);
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            return CreateResponse(new BaseResponse
-            {
-                HasError = true,
-                Code = StatusCodes.Status500InternalServerError,
-                Title = nameof(StatusMessage.Error),
-                Message = exception.GetBaseException().Message
-            });
+            throw LogTimeException.Throw(ex);
         }
     }
 
@@ -77,15 +61,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
             return CreateResponse(fetchActiveSessionResponse);
 
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            return CreateResponse(new BaseResponse
-            {
-                HasError = true,
-                Code = StatusCodes.Status500InternalServerError,
-                Title = nameof(StatusMessage.Error),
-                Message = exception.GetBaseException().Message
-            });
+            throw LogTimeException.Throw(ex);
         }
     }
 
@@ -98,15 +76,9 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
             return CreateResponse(validateCredentialResponse);
 
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            return CreateResponse(new BaseResponse
-            {
-                HasError = true,
-                Code = StatusCodes.Status500InternalServerError,
-                Title = nameof(StatusMessage.Error),
-                Message = exception.GetBaseException().Message
-            });
+            throw LogTimeException.Throw(ex);
         }
     }
 }

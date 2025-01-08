@@ -1,4 +1,4 @@
-﻿namespace LogTime;
+﻿namespace LogTime.Windows;
 
 public partial class DialogBox : Window
 {
@@ -20,7 +20,7 @@ public partial class DialogBox : Window
         ImageSource = GetImageSource(alertType);
     }
 
-    public static bool Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.OK, AlertType alertType = AlertType.Info)
+    public static bool Show(string caption, string message, DialogBoxButton buttonGroup = DialogBoxButton.OK, AlertType alertType = AlertType.Information)
     {
         var messageBox = new DialogBox(caption, message, buttonGroup, alertType);
         messageBox.ShowDialog();
@@ -29,14 +29,16 @@ public partial class DialogBox : Window
 
     private static string GetImageSource(AlertType alertType)
     {
-        return alertType switch
+        var imageType = alertType switch
         {
-            AlertType.Info => "Images/info.png",
-            AlertType.Warning => "Images/warning.png",
-            AlertType.Error => "Images/error.png",
-            AlertType.Question => "Images/question.png",
+            AlertType.Information => "../Images/info.png",
+            AlertType.Warning => "../Images/warning.png",
+            AlertType.Error => "../Images/error.png",
+            AlertType.Question => "../Images/question.png",
             _ => ""
         };
+
+        return imageType;
     }
 
     private void ConfigureButtons(DialogBoxButton dialogBoxButton)

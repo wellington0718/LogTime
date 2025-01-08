@@ -1,16 +1,44 @@
-﻿namespace LogTime.Services;
+﻿using Polly;
+using Polly.Retry;
+
+namespace LogTime.Services;
 
 public class LogTimeApiClient : ILogTimeApiClient
 {
     private readonly HttpClient _httpClient;
+    private readonly ILoadingService loadingService;
     private readonly JsonSerializerOptions _jsonOptions;
+    private RetryStrategyOptions<HttpResponseMessage> options;
+    private ResiliencePipeline<HttpResponseMessage> pipeline;
+    private int maxRetryAttempts = 1;
+    public bool Fail { get; set; } = true;
 
-    public LogTimeApiClient(HttpClient httpClient)
+    public async Task<HttpResponseMessage> ExecuteUnstable()
+    {
+
+        try
+        {
+            if (Fail)
+            {
+                Console.WriteLine($"{DateTime.UtcNow}: Execute failed");
+                await Task.FromResult(Fail);
+                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            }
+
+            Fail = true;
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+
+    }
+
+    public LogTimeApiClient(HttpClient httpClient, ILoadingService loadingService)
     {
         _httpClient = httpClient;
-       // _httpClient.BaseAddress = new Uri("http://localhost:5208/api/");
-        _httpClient.BaseAddress = new Uri("http://minerva:56848/logtime-3.0-api/api/");
-        _httpClient.Timeout = TimeSpan.FromSeconds(30);
+        this.loadingService = loadingService;
 
         _jsonOptions = new JsonSerializerOptions
         {
@@ -18,22 +46,47 @@ public class LogTimeApiClient : ILogTimeApiClient
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
+
+        options = new RetryStrategyOptions<HttpResponseMessage>
+        {
+            MaxRetryAttempts = maxRetryAttempts,
+            Delay = TimeSpan.FromSeconds(10),
+            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                           .Handle<Exception>(),
+
+            OnRetry = (args) =>
+            {
+                loadingService.Show($"Ha ocurrido un error al precesar la solicitud. \n Iniciando reintento... Intento: {args.AttemptNumber + 1}/{maxRetryAttempts}");
+                return default;
+            }
+        };
+
+        pipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+             .AddTimeout(TimeSpan.FromSeconds(60))
+             .AddRetry(options).Build();
     }
 
-    private async Task<T> SendAsync<T>(string endpoint, object? body = null)
+    private async Task<T> SendAsync<T>(string endpoint, object body)
     {
-            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
-            if (body != null)
-            {
-                var content = JsonSerializer.Serialize(body, _jsonOptions);
-                request.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            }
+        var content = JsonSerializer.Serialize(body, _jsonOptions);
 
-            using var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var responseDataString = await response.Content.ReadAsStringAsync();
-            var responseDataObj = JsonSerializer.Deserialize<T>(responseDataString, _jsonOptions) ?? throw new InvalidOperationException("Failed to deserialize response.");
-            return responseDataObj;
+        var response = await pipeline.ExecuteAsync(async (ctx) =>
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json")
+            };
+
+            return await _httpClient.SendAsync(request, ctx);
+
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var responseDataString = await response.Content.ReadAsStringAsync();
+        var responseDataObj = JsonSerializer.Deserialize<T>(responseDataString, _jsonOptions)
+                               ?? throw new InvalidOperationException("Failed to deserialize response.");
+        return responseDataObj;
     }
 
     public async Task<BaseResponse> ValidateCredentialsAsync(ClientData clientData)

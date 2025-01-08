@@ -65,7 +65,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                 logEntry.LogMessage = Resource.RESTRICTED_ACCESS;
                 logService.Log(logEntry);
 
-                DialogBox.Show(Resource.RESTRICTED_ACCESS, Resource.RESTRICTED_ACCESS_TITLE, DialogBoxButton.OK, AlertType.Info);
+                DialogBox.Show(Resource.RESTRICTED_ACCESS, Resource.RESTRICTED_ACCESS_TITLE, DialogBoxButton.OK, AlertType.Information);
                 return;
             }
 
@@ -113,7 +113,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
                             GlobalData.SessionData = newsessionData;
                             App.ShowWindow<MainWindow>();
-                            App.CloseWindow<Login>();
+                            App.CloseWindow<LoginWindow>();
                         }
                         else
                         {
@@ -144,7 +144,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
                         GlobalData.SessionData = newsessionData;
                         App.ShowWindow<MainWindow>();
-                        App.CloseWindow<Login>();
+                        App.CloseWindow<LoginWindow>();
                     }
                     else
                     {
@@ -162,8 +162,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
             loadingService.Close();
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);
-            var message = exception.Message;
-            DialogBox.Show(message, "Error", DialogBoxButton.OK, AlertType.Error);
+            ExceptionService.Handle(exception.Message);
         }
         finally
         {

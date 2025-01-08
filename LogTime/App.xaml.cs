@@ -1,4 +1,4 @@
-﻿using Domain.Models;
+﻿using System.Net.Http;
 
 namespace LogTime;
 
@@ -95,7 +95,7 @@ public partial class App : Application
         window?.Close();
     }
 
-    protected override void OnStartup(StartupEventArgs e) => ShowWindow<Login>();
+    protected override void OnStartup(StartupEventArgs e) => ShowWindow<LoginWindow>();
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -103,7 +103,7 @@ public partial class App : Application
         services.AddTransient<MainVM>();
         services.AddTransient<LoadingVM>();
 
-        services.AddTransient<Login>();
+        services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
         services.AddTransient<Loading>();
 
@@ -111,6 +111,10 @@ public partial class App : Application
         services.AddSingleton(Configuration);
         services.AddSingleton<FtpService>();
         services.AddSingleton<ILogService, LogService>();
-        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>();
+        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>(httpClient => {
+            // _httpClient.BaseAddress = new Uri("http://localhost:5208/api/");
+            httpClient.BaseAddress = new Uri("http://minerva:56848/logtime-3.0-api/api/");
+            httpClient.Timeout = TimeSpan.FromSeconds(60);
+        });
     }
 }

@@ -170,7 +170,7 @@ public partial class MainVM : ObservableObject
         try
         {
             var isShutDown = !string.IsNullOrEmpty(shutDown);
-            var action = isShutDown? "salir la aplicación" : "reiniciar la aplicación";
+            var action = isShutDown ? "salir la aplicación" : "reiniciar la aplicación";
             var closeSessionConfirmation = DialogBox.Show(string.Format(Resource.CLOSE_SESSION_ACONFIRMATION, action),
                 Resource.CLOSE_SESSION_CONFIRMATION_TITLE, DialogBoxButton.YesNo, AlertType.Question);
 
@@ -265,7 +265,7 @@ public partial class MainVM : ObservableObject
 
                         if (!hasError)
                         {
-                            var result = DialogBox.Show("La sesión fue cerrada debido a que el tiempo de inactividad fue exedido", "LogTime - Tiempo de inactividad", alertType: AlertType.Info);
+                            var result = DialogBox.Show("La sesión fue cerrada debido a que el tiempo de inactividad fue exedido", "LogTime - Tiempo de inactividad", alertType: AlertType.Information);
                             App.Restart();
                         }
                     }
@@ -417,7 +417,7 @@ public partial class MainVM : ObservableObject
         logEntry.LogMessage += errorMessage;
         logEntry.MethodName += methodName;
         logService.Log(logEntry);
-        DialogBox.Show(Resource.UNKNOWN_ERROR, Resource.UNKNOWN_ERROR_TITLE, alertType: AlertType.Error);
+        ExceptionService.Handle(errorMessage);
     }
 
     private void RevertToPrevoiusStatus() => CurrentStatusIndex = previousStatusId;

@@ -1,10 +1,10 @@
-﻿namespace LogTime;
+﻿namespace LogTime.Windows;
 
-public partial class Login : Window
+public partial class LoginWindow : Window
 {
     private readonly LoginVM _loginVM;
 
-    public Login(LoginVM loginVM)
+    public LoginWindow(LoginVM loginVM)
     {
         InitializeComponent();
         _loginVM = loginVM;

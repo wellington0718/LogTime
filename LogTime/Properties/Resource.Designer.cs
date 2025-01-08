@@ -241,6 +241,15 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tras varios intentos no se pudo realizar la peticón. Parece que no estás conectado a la red de Synergies. Verifica tu conexión e inténtalo nuevamente. Si el problema persiste, por favor contacta al Departamento de IT..
+        /// </summary>
+        internal static string RETRY_FAIL_CONEXION_MESSAGE {
+            get {
+                return ResourceManager.GetString("RETRY_FAIL_CONEXION_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to La sesión ya había sido cerrada por alguien más o por un servicio..
         /// </summary>
         internal static string SESSION_ALREADY_CLOSED {
@@ -259,7 +268,7 @@ namespace LogTime.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ha ocurrido un error desconocido al procesar la información..
+        ///   Looks up a localized string similar to Ha ocurrido un error desconocido al procesar la información, por favor contacta al Departamento de IT..
         /// </summary>
         internal static string UNKNOWN_ERROR {
             get {

@@ -22,3 +22,4 @@ global using Squirrel;
 global using System.Net.Http;
 global using System.Text;
 global using System.Text.Json;
+global using LogTime.Windows;

@@ -31,7 +31,7 @@ public enum DialogBoxButton
 
 public enum AlertType
 {
-    Info,
+    Information,
     Warning,
     Error,
     Question

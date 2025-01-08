@@ -175,7 +175,7 @@
     <value>LogTime - Error de sesión</value>
   </data>
   <data name="UNKNOWN_ERROR" xml:space="preserve">
-    <value>Ha ocurrido un error desconocido al procesar la información.</value>
+    <value>Ha ocurrido un error desconocido al procesar la información, por favor contacta al Departamento de IT.</value>
   </data>
   <data name="UNKNOWN_ERROR_TITLE" xml:space="preserve">
     <value>LogTime - Error desconocido</value>
@@ -188,5 +188,8 @@
   </data>
   <data name="CLOSE_SESSION_CONFIRMATION_TITLE" xml:space="preserve">
     <value>LogTime - Cierre de sesión</value>
+  </data>
+  <data name="RETRY_FAIL_CONEXION_MESSAGE" xml:space="preserve">
+    <value>Tras varios intentos no se pudo realizar la peticón. Parece que no estás conectado a la red de Synergies. Verifica tu conexión e inténtalo nuevamente. Si el problema persiste, por favor contacta al Departamento de IT.</value>
   </data>
 </root>

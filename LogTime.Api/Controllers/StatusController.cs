@@ -1,4 +1,6 @@
-﻿namespace LogTime.Api.Controllers
+﻿using LogTime.Api.CustomExceptionHandler;
+
+namespace LogTime.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
@@ -12,15 +14,9 @@
                 var changeStatusResponse = await logTimeUnitOfWork.ChangeStatusAsync(statusHistoryChange.NewActivityId, statusHistoryChange.Id);
                 return CreateResponse(changeStatusResponse);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                return CreateResponse(new BaseResponse
-                {
-                    HasError = true,
-                    Code = StatusCodes.Status500InternalServerError,
-                    Title = nameof(StatusMessage.Error),
-                    Message = exception.GetBaseException().Message
-                });
+                throw LogTimeException.Throw(ex);
             }
         }
     }
