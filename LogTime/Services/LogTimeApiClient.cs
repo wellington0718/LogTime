@@ -6,39 +6,14 @@ namespace LogTime.Services;
 public class LogTimeApiClient : ILogTimeApiClient
 {
     private readonly HttpClient _httpClient;
-    private readonly ILoadingService loadingService;
     private readonly JsonSerializerOptions _jsonOptions;
-    private RetryStrategyOptions<HttpResponseMessage> options;
-    private ResiliencePipeline<HttpResponseMessage> pipeline;
-    private int maxRetryAttempts = 1;
-    public bool Fail { get; set; } = true;
-
-    public async Task<HttpResponseMessage> ExecuteUnstable()
-    {
-
-        try
-        {
-            if (Fail)
-            {
-                Console.WriteLine($"{DateTime.UtcNow}: Execute failed");
-                await Task.FromResult(Fail);
-                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            }
-
-            Fail = true;
-            return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
-
-    }
+    private readonly RetryStrategyOptions<HttpResponseMessage> options;
+    private readonly ResiliencePipeline<HttpResponseMessage> pipeline;
+    private readonly int maxRetryAttempts = 6;
 
     public LogTimeApiClient(HttpClient httpClient, ILoadingService loadingService)
     {
         _httpClient = httpClient;
-        this.loadingService = loadingService;
 
         _jsonOptions = new JsonSerializerOptions
         {
