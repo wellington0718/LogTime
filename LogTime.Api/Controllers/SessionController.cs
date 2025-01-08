@@ -1,5 +1,3 @@
-using Domain.Models;
-
 namespace LogTime.Api.Controllers;
 
 [ApiController]
@@ -98,7 +96,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
         {
             var validateCredentialResponse = await logTimeUnitOfWork.ValidateCredentialsAsync(clientData.User, clientData.Password);
             return CreateResponse(validateCredentialResponse);
-            
+
         }
         catch (Exception exception)
         {

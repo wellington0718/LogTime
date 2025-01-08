@@ -1,4 +1,6 @@
-﻿namespace LogTime;
+﻿using Domain.Models;
+
+namespace LogTime;
 
 public partial class App : Application
 {
@@ -24,11 +26,22 @@ public partial class App : Application
 
     public static void Restart()
     {
-        var executablePath = Environment.ProcessPath;
-        if (executablePath != null)
+
+        try
         {
-            Process.Start(executablePath);
-            Current?.Shutdown();
+            var executablePath = Environment.ProcessPath;
+
+            if (executablePath != null && executablePath.Contains("bin"))
+            {
+                Process.Start(executablePath);
+                Current?.Shutdown();
+            }
+
+            UpdateManager.RestartApp();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
         }
     }
 

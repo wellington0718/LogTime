@@ -19,7 +19,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
     public async Task Login()
     {
         UserId = UserId.Trim().PadLeft(8, '0');
-
         var logEntry = new LogEntry
         {
             ClassName = nameof(LoginVM),
@@ -31,13 +30,13 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
         try
         {
             logService.Log(logEntry);
-            
+
             if (!ValidateCredentialFormat())
             {
                 DialogBox.Show(Resource.CREDENTIALS_ERROR, Resource.AUTH_ERROR_TITLE, DialogBoxButton.OK, AlertType.Error);
                 return;
             }
-            
+
             logEntry.LogMessage = "Validando credenciales.";
             logService.Log(logEntry);
 

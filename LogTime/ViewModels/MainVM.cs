@@ -119,7 +119,15 @@ public partial class MainVM : ObservableObject
         {
             HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
         }
+        finally
+        {
+            canHandleStatusChange = true;
+        }
+
     }
+
+    [RelayCommand]
+    public void ShowLogFile() => logService.ShowLog(SessionData.User.Id);
 
     private void LoggingOff(object sender, SessionEndedEventArgs e)
     {

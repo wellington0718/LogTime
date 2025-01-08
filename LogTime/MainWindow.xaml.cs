@@ -2,21 +2,13 @@
 
 public partial class MainWindow : Window
 {
-
     public MainWindow(MainVM mainVM)
     {
-        try
-        {
-            InitializeComponent();
-            Application.Current.ThemeMode = ThemeMode.Dark;
-            Title = GlobalData.AppNameVersion;
-            DataContext = mainVM;
-            App.Update();
-        }
-        catch (Exception ex)
-        {
-
-        }
+        InitializeComponent();
+        Application.Current.ThemeMode = ThemeMode.Dark;
+        Title = GlobalData.AppNameVersion;
+        DataContext = mainVM;
+        App.Update();
     }
 
     private void OpenFlyout(object sender, MouseButtonEventArgs e) => FlyoutPopup.IsOpen = true;
@@ -48,9 +40,5 @@ public partial class MainWindow : Window
         {
             MessageBox.Show($"Failed to open browser: {ex.Message}");
         }
-    }
-    private void ShowLogsDialog(object sender, RoutedEventArgs e)
-    {
-
     }
 }

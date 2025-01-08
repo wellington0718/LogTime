@@ -37,9 +37,7 @@ if (app.Environment.IsDevelopment())
 
 }
 
-app.UsePathBase("/LogTime");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

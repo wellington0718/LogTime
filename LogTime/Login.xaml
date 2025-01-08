@@ -54,7 +54,7 @@
                 <Grid Grid.Row="1" Width="200">
                     <StackPanel VerticalAlignment="Center">
                         <Image Source="Images/icon.png" Height="70"/>
-                        <TextBlock FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" Text="LOGTIME" FontStyle="Italic" Foreground="#FFF"/>
+                        <TextBlock FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}" FontStyle="Italic" Foreground="#FFF"/>
                         <!--<TextBlock FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Text="Aplicación de registro de tiempo" Margin="0,0,0,20" Foreground="#FFF"/>-->
                         <StackPanel Margin="0, 15, 0, 0">
                             <Label Content="Usuario Id" FontSize="14" Foreground="#FFF"/>

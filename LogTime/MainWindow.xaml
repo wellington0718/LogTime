@@ -48,7 +48,7 @@
                                         <MenuItem Header="Sesiones activas" Cursor="Hand" Tag="UsersSessions" Click="NavigateToUrl"/>
                                         <MenuItem Header="Grupos" Cursor="Hand" Tag="Groups" Click="NavigateToUrl"/>
                                     </MenuItem>
-                                    <MenuItem Header="Logs" Cursor="Hand" Click="ShowLogsDialog" Foreground="#FFF"/>
+                                    <MenuItem Header="Logs" Cursor="Hand" Foreground="#FFF" Command="{Binding ShowLogFileCommand}"/>
                                     <MenuItem Header="Ayuda" Cursor="Hand" Click="ShowHelpDialog" Foreground="#FFF"/>
                                     <Separator />
                                     <MenuItem Cursor="Hand" Header="Cerrar sessión" Command="{Binding CloseSessionCommand}" Foreground="#FFF"/>

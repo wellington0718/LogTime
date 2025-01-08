@@ -1,4 +1,6 @@
-﻿namespace LogTime.Services;
+﻿using System.Collections.ObjectModel;
+
+namespace LogTime.Services;
 
 public class LogService : ILogService
 {
@@ -28,5 +30,50 @@ public class LogService : ILogService
 
         writer.WriteLine(logEntry);
         writer.WriteLine(separator);
+    }
+
+    public void ShowLog(string userId)
+    {
+        var logName = $"{userId}.log";
+        string filePath = $"C:\\LogTimeLogs/{logName}";
+
+        if (!File.Exists(filePath)) {
+            DialogBox.Show($"El archivo ({logName}) no existe.", "LogTime - Archivo No Existe", DialogBoxButton.OK, AlertType.Error);
+            return;
+        }
+
+        var logLines = File.ReadAllLines(filePath).Skip(1).Where(line => !line.StartsWith('-'));
+        ObservableCollection<LogEntry> logs = new(logLines.Select(ParseLogString));
+
+        var fileLogWindow = new FileLogWindow
+        {
+            Title = logName,
+            DataContext = new { Logs = logs }
+        };
+
+        fileLogWindow.Show();
+    }
+
+    private LogEntry ParseLogString(string logString)
+    {
+        try
+        {
+            var parts = logString.Split('|').Select(p => p.Trim()).ToArray();
+
+            return new LogEntry
+            {
+                Version = parts[0],
+                Date = parts[1],
+                ClassName = parts[2],
+                MethodName = parts[3],
+                LogMessage = parts[4]
+            };
+
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 }

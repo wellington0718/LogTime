@@ -1,0 +1,24 @@
+﻿<Window x:Class="LogTime.FileLogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LogTime"
+        ResizeMode="CanMinimize"
+        Topmost="True"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="Width" >
+
+    <Grid Margin="15">
+        <DataGrid Padding="10" ItemsSource="{Binding Logs}" AutoGenerateColumns="False" HeadersVisibility="Column" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80"/>
+                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="200"/>
+                <DataGridTextColumn Header="Class Name" Binding="{Binding ClassName}" MaxWidth="200" Width="100"/>
+                <DataGridTextColumn Header="Method Name" Binding="{Binding MethodName}" MinWidth="150"/>
+                <DataGridTextColumn Header="Log Message" Binding="{Binding LogMessage}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
