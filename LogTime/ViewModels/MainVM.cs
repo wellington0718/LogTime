@@ -13,7 +13,7 @@ public partial class MainVM : ObservableObject
     [ObservableProperty]
     private int currentStatusIndex;
 
-    private readonly static DispatcherTimer? generalTimer;
+    private readonly static DispatcherTimer generalTimer = new() { Interval = TimeSpan.FromSeconds(1)};
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
@@ -46,10 +46,10 @@ public partial class MainVM : ObservableObject
         loginDate = serverConnection;
         currentStatusIndex = (int)SharedStatus.NoActivity;
         previousStatusId = currentStatusIndex;
-        activityIdleTimeSeconds = SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
+        activityIdleTimeSeconds = 1;//SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
         logEntry = new LogEntry { ClassName = nameof(MainVM), UserId = SessionData.User?.Id, };
-        generalTimer!.Tick += GeneralTimerTick;
-        generalTimer?.Start();
+        generalTimer.Start();
+        generalTimer.Tick += GeneralTimerTick;
     }
 
     [DllImport("Sensapi")]
@@ -259,8 +259,6 @@ public partial class MainVM : ObservableObject
 
                         var CloseSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
                         var hasError = HandleResponseErrors(CloseSessionResponse);
-                        loadingService.Close();
-                        generalTimer.Stop();
 
                         if (!hasError)
                         {
@@ -313,13 +311,21 @@ public partial class MainVM : ObservableObject
 
     private async Task UpdateSessionAliveDateAsync(bool isRefreshing)
     {
+        
         if (sessionTimeSpan.Minutes % 1 == 0 && sessionTimeSpan.Seconds == 0 || isRefreshing)
         {
+            if (isRefreshing)
+            {
+                loadingService.Show("Actualizando datos de conexión, por favor espere...");
+            }
+
             var updateSessionAliveDateResponse = await logTimeApiClient.UpdateSessionAliveDateAsync(SessionData.ActiveLog.ActualLogHistoryId);
             var hasResponseErros = HandleResponseErrors(updateSessionAliveDateResponse);
 
             if (!hasResponseErros && updateSessionAliveDateResponse.LastDate is not null)
                 ServerConnection = updateSessionAliveDateResponse.LastDate.Value.ToString("yyyy-MM-dd HH:mm:ss");
+
+            loadingService.Close();
         }
     }
 
@@ -330,7 +336,7 @@ public partial class MainVM : ObservableObject
             logEntry.MethodName = nameof(HandleStatusChange);
 
             loadingService.Show("Cambiando de actividad, por favor espere...");
-            activityIdleTimeSeconds = selectedStatus.IdleTime * 60;
+           // activityIdleTimeSeconds = selectedStatus.IdleTime * 60;
             logEntry.LogMessage = $"Cambiando a actividad de {selectedStatus.Description}";
             logService.Log(logEntry);
 

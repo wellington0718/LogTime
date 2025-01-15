@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+﻿using System.Configuration;
 
 namespace LogTime;
 
@@ -15,7 +15,7 @@ public partial class App : Application
     {
         Configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
 
         var serviceCollection = new ServiceCollection();
@@ -36,8 +36,11 @@ public partial class App : Application
                 Process.Start(executablePath);
                 Current?.Shutdown();
             }
+            else
+            {
+                UpdateManager.RestartApp();
+            }
 
-            UpdateManager.RestartApp();
         }
         catch (Exception ex)
         {
@@ -111,10 +114,10 @@ public partial class App : Application
         services.AddSingleton(Configuration);
         services.AddSingleton<FtpService>();
         services.AddSingleton<ILogService, LogService>();
-        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>(httpClient => {
-            // _httpClient.BaseAddress = new Uri("http://localhost:5208/api/");
-            httpClient.BaseAddress = new Uri("http://minerva:56848/logtime-3.0-api/api/");
+        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>(httpClient =>
+        {
             httpClient.Timeout = TimeSpan.FromSeconds(60);
+            httpClient.BaseAddress = new Uri(Configuration["ApiBaseUri"] ?? "http://localhost:5208/api/");
         });
     }
 }

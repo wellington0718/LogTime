@@ -12,6 +12,7 @@
     <StartupObject>LogTime.Program</StartupObject>
     <ApplicationIcon>Images\icon.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Development;Production;Staging;Release;Debug</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,9 +32,14 @@
     <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FluentFTP" Version="52.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.50">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Polly.Core" Version="8.5.0" />
   </ItemGroup>
@@ -43,10 +49,29 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.Staging.json">
+      <TransformOnBuild>true</TransformOnBuild>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.Production.json">
+      <TransformOnBuild>true</TransformOnBuild>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.Development.json">
+      <TransformOnBuild>true</TransformOnBuild>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TransformOnBuild>true</TransformOnBuild>
     </Content>
     <Content Include="Images\error.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -90,7 +115,14 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="PostPublishTarget" Condition=" '$(Configuration)' == 'Release'" AfterTargets="Build">
+  <ItemGroup>
+    <None Update="appsettings.Debug.json">
+      <IsTransformFile>true</IsTransformFile>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PostPublishTarget" Condition="'$(Configuration)'=='Production'" AfterTargets="Build">
     <Exec Command="squirrel pack -u LogTime -i Images\icon.ico -v $(AssemblyVersion) -f $(Runtime) --appIcon Images\icon.ico -p $(TargetDir)" />
   </Target>
 </Project>

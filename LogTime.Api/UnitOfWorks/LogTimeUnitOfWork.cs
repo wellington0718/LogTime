@@ -1,4 +1,7 @@
-﻿namespace LogTime.Api.UnitOfWorks;
+﻿using Domain.Models;
+using System.Linq;
+
+namespace LogTime.Api.UnitOfWorks;
 
 public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider provider) : GenericUnitOfWork(dataContext), ILogTimeUnitOfWork
 {
@@ -57,6 +60,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
             ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
         });
 
+        LogHistoryRepository.UpdateRange(logHistories);
         await SaveChangesAsync();
         await CommitAsync();
 

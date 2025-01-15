@@ -14,7 +14,7 @@ public class LogEntry
         return string.Format(
          "{0,-15} | {1,-25} | {2,-25} | {3,-50} | {4}",
          Version,
-         Date = DateTime.Now.ToString("yyyy/mm/dd hh:MM:ss tt"),
+         Date = DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss tt"),
          ClassName,
          MethodName,
          LogMessage);
