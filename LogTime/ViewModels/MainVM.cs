@@ -13,7 +13,7 @@ public partial class MainVM : ObservableObject
     [ObservableProperty]
     private int currentStatusIndex;
 
-    private readonly DispatcherTimer generalTimer;
+    private readonly static DispatcherTimer? generalTimer;
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
@@ -35,7 +35,6 @@ public partial class MainVM : ObservableObject
     public MainVM(ILogService logService, ILogTimeApiClient logTimeApiClient, ILoadingService loadingService)
     {
         var loginDateTime = GlobalData.SessionData.LogHistory.LoginDate;
-        generalTimer = new() { Interval = TimeSpan.FromSeconds(1) };
         this.logService = logService;
         this.logTimeApiClient = logTimeApiClient;
         this.loadingService = loadingService;
@@ -49,8 +48,8 @@ public partial class MainVM : ObservableObject
         previousStatusId = currentStatusIndex;
         activityIdleTimeSeconds = SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
         logEntry = new LogEntry { ClassName = nameof(MainVM), UserId = SessionData.User?.Id, };
-        generalTimer.Tick += GeneralTimerTick;
-        generalTimer.Start();
+        generalTimer!.Tick += GeneralTimerTick;
+        generalTimer?.Start();
     }
 
     [DllImport("Sensapi")]
@@ -396,7 +395,7 @@ public partial class MainVM : ObservableObject
         {
             logEntry.LogMessage = baseResponse.Message;
             logService.Log(logEntry);
-            generalTimer.Stop();
+            generalTimer?.Stop();
 
             var retry = DialogBox.Show(Resource.RETRY_CLOSE_SESSION, Resource.RETRY_CLOSE_SESSION_TITLE);
             if (!retry)
@@ -437,4 +436,16 @@ public partial class MainVM : ObservableObject
     private bool IsEarlyBreakChange(int selectedStatusIndex) => !(previousStatusId != (int)SharedStatus.Break
         || activityTimeSpan.Minutes >= Constants.MinimumBreakDurationMinutes
         || selectedStatusIndex == (int)SharedStatus.Break);
+
+    internal static void HandleGeneralTimerTickOnRetry(bool isRetring)
+    {
+        if(isRetring)
+        {
+            generalTimer?.Stop();
+        }
+        else
+        {
+            generalTimer?.Start();
+        }
+    }
 }
