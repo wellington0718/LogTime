@@ -6,9 +6,8 @@
         xmlns:local="clr-namespace:LogTime" 
         xmlns:customcontrols="clr-namespace:LogTime.CustomControls"
         mc:Ignorable="d"
-        Title="Loading" Height="60" Width="380" 
+        Title="Loading" Width="380" SizeToContent="Height"
         ResizeMode="NoResize" 
-        Topmost="true"
         Background="Transparent"
         AllowsTransparency="True" 
         WindowStyle="None"
@@ -16,16 +15,17 @@
         ShowInTaskbar="False">
 
     <Border Background="#FFF" CornerRadius="8">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel VerticalAlignment="Center">
 
             <TextBlock Foreground="#333" Text="{Binding Message}" 
                        FontSize="16" 
-                       Margin="10" 
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Center" />
+                       Padding="10, 5, 0 0"
+                       TextWrapping="Wrap"/>
 
-            <ProgressBar IsIndeterminate="True" Width="400" Height="10" />
+            <ProgressBar IsIndeterminate="True" Height="5" Margin="0, 5"/>
 
+            <Button x:Name="CancelBtn" Content="Cancel" HorizontalAlignment="Right" Height="30" Width="60"
+                    Margin="0, 0, 10, 5" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelRetryCommand}"/>
         </StackPanel>
     </Border>
 </Window>

@@ -15,7 +15,7 @@
         WindowStartupLocation="CenterScreen"
         Height="390" Width="400">
 
-    <Border CornerRadius="8" BorderThickness="1" BorderBrush="#0065B1">
+    <Border IsEnabled="{Binding IsInteractionEnabled, UpdateSourceTrigger=PropertyChanged}"  CornerRadius="8" BorderThickness="1" BorderBrush="#0065B1">
         <Border CornerRadius="8" Background="#333">
             <Grid>
                 <Grid.RowDefinitions>

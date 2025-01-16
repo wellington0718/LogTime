@@ -17,24 +17,28 @@ public class RetryService
 
         do
         {
-            MainVM.HandleGeneralTimerTickOnRetry(true);
-
             try
             {
+                if (attempt == 1)
+                {
+                    MainVM.HandleGeneralTimerTickOnRetry(true);
+                }
+
                 cancellationToken.ThrowIfCancellationRequested();
                 var response = await operation();
                 loadingService?.Close();
+                MainVM.HandleGeneralTimerTickOnRetry(false);
                 return response;
             }
             catch (Exception)
             {
-                attempt++;
-                loadingService?.Show($"Ha ocurrido un error al precesar la solicitud. \n Iniciando reintento... Intento: {attempt}/{retryCount}");
-
                 if (attempt >= retryCount)
                 {
                     throw;
                 }
+
+                attempt++;
+                loadingService?.Show($"Ha ocurrido un error al precesar la solicitud. \n Iniciando reintento... Intento: {attempt}/{retryCount}");
 
                 await Task.Delay(TimeSpan.FromSeconds(retryDelay), cancellationToken);
             }

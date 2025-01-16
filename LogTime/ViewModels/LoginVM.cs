@@ -7,13 +7,13 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
     [ObservableProperty]
     private string password = string.Empty;
-
     [ObservableProperty]
-    private bool isLoading;
+    private string message = string.Empty;
 
     [ObservableProperty]
     private string loadingMessage = string.Empty;
-
+    [ObservableProperty]
+    private bool isInteractionEnabled = true;
 
     [RelayCommand]
     public async Task Login()
@@ -151,7 +151,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                         loadingService.Close();
                         logEntry.LogMessage = newsessionData.Message;
                         logService.Log(logEntry);
-
                         DialogBox.Show(newsessionData.Message, newsessionData.Title, DialogBoxButton.OK, AlertType.Error);
                     }
                 }
@@ -163,10 +162,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);
             ExceptionService.Handle(exception.Message);
-        }
-        finally
-        {
-            loadingService.Close();
         }
     }
 

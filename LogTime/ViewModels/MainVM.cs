@@ -3,6 +3,13 @@
 public partial class MainVM : ObservableObject
 {
     [ObservableProperty]
+    private string message = string.Empty;
+
+    [ObservableProperty]
+    private string loadingMessage = string.Empty;
+    [ObservableProperty]
+    private bool isInteractionEnabled = true;
+    [ObservableProperty]
     private string sessionTime = "00:00:00";
     [ObservableProperty]
     private string activityTime = "00:00:00";
@@ -46,7 +53,7 @@ public partial class MainVM : ObservableObject
         loginDate = serverConnection;
         currentStatusIndex = (int)SharedStatus.NoActivity;
         previousStatusId = currentStatusIndex;
-        activityIdleTimeSeconds = 1;//SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
+        activityIdleTimeSeconds = SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
         logEntry = new LogEntry { ClassName = nameof(MainVM), UserId = SessionData.User?.Id, };
         generalTimer.Start();
         generalTimer.Tick += GeneralTimerTick;
@@ -286,10 +293,6 @@ public partial class MainVM : ObservableObject
             loadingService.Close();
             HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
         }
-        finally
-        {
-            loadingService.Close();
-        }
     }
 
     private async Task CloseSessionByUserGroupLogOutTimeReached()
@@ -336,7 +339,7 @@ public partial class MainVM : ObservableObject
             logEntry.MethodName = nameof(HandleStatusChange);
 
             loadingService.Show("Cambiando de actividad, por favor espere...");
-           // activityIdleTimeSeconds = selectedStatus.IdleTime * 60;
+            activityIdleTimeSeconds = selectedStatus.IdleTime * 60;
             logEntry.LogMessage = $"Cambiando a actividad de {selectedStatus.Description}";
             logService.Log(logEntry);
 

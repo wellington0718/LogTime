@@ -114,10 +114,6 @@ public partial class App : Application
         services.AddSingleton(Configuration);
         services.AddSingleton<FtpService>();
         services.AddSingleton<ILogService, LogService>();
-        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>(httpClient =>
-        {
-            httpClient.Timeout = TimeSpan.FromSeconds(60);
-            httpClient.BaseAddress = new Uri(Configuration["ApiBaseUri"] ?? "http://localhost:5208/api/");
-        });
+        services.AddHttpClient<ILogTimeApiClient, LogTimeApiClient>();
     }
 }
