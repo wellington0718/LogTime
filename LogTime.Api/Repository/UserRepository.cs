@@ -116,24 +116,14 @@ public class UserRepository(LogTimeDataContext dataContext) : IUserRepository
 
                 while (await reader.ReadAsync())
                 {
-                    //employee.EmployeeId = (int)reader["EmployeeId"];
-                    //employee.FullName = (string)reader["FullName"];
-                    //employee.Supervisor = (string)reader["Supervisor"];
-                    //employee.StartTime = (DateTime)reader["StartTime"];
-                    //employee.EndTime = (DateTime)reader["EndTime"];
-                    //employee.ReturnTime = (string)reader["ReturnTime"];
-                    //employee.Status = (string)reader["Status"];
-                    //employee.Reason = (string)reader["Reason"];
-
                     IsNotAllowed = (long)reader["IsNotAllowed"] > 0;
                 }
             }
 
             return IsNotAllowed;
         }
-        catch (Exception exception)
+        catch
         {
-            Console.WriteLine(exception.Message);
             throw;
         }
     }
