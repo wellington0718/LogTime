@@ -3,13 +3,6 @@
 public partial class MainVM : ObservableObject
 {
     [ObservableProperty]
-    private string message = string.Empty;
-
-    [ObservableProperty]
-    private string loadingMessage = string.Empty;
-    [ObservableProperty]
-    private bool isInteractionEnabled = true;
-    [ObservableProperty]
     private string sessionTime = "00:00:00";
     [ObservableProperty]
     private string activityTime = "00:00:00";

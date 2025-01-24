@@ -6,6 +6,4 @@ public partial class Loading : Window
     {
         InitializeComponent();
     }
-
-    
 }

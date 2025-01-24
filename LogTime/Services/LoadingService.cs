@@ -4,6 +4,10 @@ public class LoadingService : ILoadingService
 {
     private Loading? _loading;
     private Window? _ownerWindow;
+    private LoadingVM? LoadingVM;
+
+    public static CancellationTokenSource? CancellationTokenSource { get; set; }
+
     public static dynamic? ViewModel { get; set; }
 
     public void Show(string message)
@@ -43,11 +47,8 @@ public class LoadingService : ILoadingService
     private void InitializeLoading(string message)
     {
         var currentWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible);
-        if (currentWindow is not null )
-        {
-            ViewModel = currentWindow.DataContext;
-            ViewModel.Message = message;
-        }
+        ViewModel = new LoadingVM();
+        ViewModel.Message = message;
 
         _loading = new Loading
         {

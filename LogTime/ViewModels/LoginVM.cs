@@ -7,13 +7,6 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
 
     [ObservableProperty]
     private string password = string.Empty;
-    [ObservableProperty]
-    private string message = string.Empty;
-
-    [ObservableProperty]
-    private string loadingMessage = string.Empty;
-    [ObservableProperty]
-    private bool isInteractionEnabled = true;
 
     [RelayCommand]
     public async Task Login()

@@ -55,6 +55,7 @@ public class LogTimeApiClient : ILogTimeApiClient
     {
         var content = JsonSerializer.Serialize(body, _jsonOptions);
         var sourceToken = new CancellationTokenSource();
+        LoadingService.CancellationTokenSource = sourceToken;
 
         var responseData = await RetryService.ExecuteWithRetryAsync(async () =>
         {
