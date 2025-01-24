@@ -9,6 +9,7 @@ static class Program
     [DllImport("user32.dll")]
     static extern bool SetForegroundWindow(IntPtr hWnd);
 
+    
     [STAThread]
     public static void Main(string[] args)
     {

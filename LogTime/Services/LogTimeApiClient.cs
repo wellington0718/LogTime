@@ -8,7 +8,7 @@ public class LogTimeApiClient : ILogTimeApiClient
     private static IConfiguration? _configuration;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public LogTimeApiClient(HttpClient httpClient, ILoadingService loadingService, IConfiguration configuration)
+    public LogTimeApiClient(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _configuration = configuration;
@@ -19,7 +19,7 @@ public class LogTimeApiClient : ILogTimeApiClient
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        _httpClient.BaseAddress = CanConnectToServer(isLocalhost:true);
+        _httpClient.BaseAddress = CanConnectToServer(isLocalhost:false);
     }
 
     private static Uri? CanConnectToServer(bool isLocalhost)
@@ -40,9 +40,7 @@ public class LogTimeApiClient : ILogTimeApiClient
                         return new($"http://{host}:56848/logtime-3.0-api/api/");
                     }
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception){}
             }
 
             return null;
@@ -51,7 +49,6 @@ public class LogTimeApiClient : ILogTimeApiClient
         {
             return new("http://localhost:5208/api/");
         }
-
     }
 
     private async Task<T> SendAsync<T>(string endpoint, object body) where T : new()

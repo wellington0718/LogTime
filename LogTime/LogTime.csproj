@@ -2,19 +2,19 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
     <AssemblyVersion>3.1.0</AssemblyVersion>
-    <Runtime>net9.0</Runtime>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <StartupObject>LogTime.Program</StartupObject>
     <ApplicationIcon>Images\icon.ico</ApplicationIcon>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>Development;Production;Staging;Release;Debug</Configurations>
+    <Configurations>Development;Production;Staging</Configurations>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsNamespaces>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <None Remove="app.manifest" />
     <None Remove="icon.ico" />
@@ -33,15 +33,14 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FluentFTP" Version="52.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.50">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Polly.Core" Version="8.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -122,8 +121,8 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostPublishTarget" Condition="'$(Configuration)'=='Production'" AfterTargets="Build">
-    <Exec Command="squirrel pack -u LogTime -i Images\icon.ico -v $(AssemblyVersion) -f $(Runtime) --appIcon Images\icon.ico -p $(TargetDir)" />
+  <Target Name="AfterPublishTarget" AfterTargets="Publish">
+    <Exec Command="squirrel pack -u LogTime -i Images\icon.ico -v $(AssemblyVersion) --appIcon Images\icon.ico -p .\Publish" />
   </Target>
 </Project>
 

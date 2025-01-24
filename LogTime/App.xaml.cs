@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class App : Application
 {
@@ -72,7 +70,7 @@ public partial class App : Application
                     Current.Dispatcher.Invoke(() =>
                     {
                         var newVersionMessage = $"¡Una nueva versión de LogTime ({newVersion}) está disponible! Los cambios se aplicarán cuando reinicies la aplicación.";
-                        MessageBox.Show(newVersionMessage, "LogTime - Actualización Disponible", MessageBoxButton.OK, MessageBoxImage.Information);
+                        DialogBox.Show(newVersionMessage, "LogTime - Actualización Disponible", DialogBoxButton.OK, AlertType.Information);
                     });
                 }
             }
@@ -81,7 +79,7 @@ public partial class App : Application
         {
             Current.Dispatcher.Invoke(() =>
             {
-                MessageBox.Show(ex.Message, "LogTime - Error de actualización", MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogBox.Show(ex.Message, "LogTime - Error de actualización", DialogBoxButton.OK, AlertType.Error);
             });
         }
     }
