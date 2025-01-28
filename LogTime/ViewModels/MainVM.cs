@@ -184,9 +184,9 @@ public partial class MainVM : ObservableObject
 
     private void ChangingOperatingSystemMode(object sender, PowerModeChangedEventArgs e)
     {
-        //SaveStatusClassLog(
-        //    Resources.METHOD_POWER_MODE,
-        //    string.Format(Resources.LOG_POWER_MODE_CHANGE, e.Mode));
+        logEntry.MethodName = nameof(ChangingOperatingSystemMode);
+        logEntry.LogMessage = string.Format("OS Power Mode changed: {0}.", e.Mode);
+        logService.Log(logEntry);
 
         if (e.Mode == PowerModes.Suspend)
         {
