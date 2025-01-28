@@ -38,7 +38,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to open browser: {ex.Message}");
+            DialogBox.Show($"Failed to open browser: {ex.Message}", "Error", alertType: AlertType.Error);
         }
     }
 }

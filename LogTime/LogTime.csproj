@@ -32,6 +32,7 @@
     <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FluentFTP" Version="52.0.0" />
+    <PackageReference Include="H.Hooks" Version="1.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />

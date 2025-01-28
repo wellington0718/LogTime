@@ -23,5 +23,4 @@ public partial class LoginWindow : Window
     private void ShutdownApplication(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
     private void MinimizeWindow(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-
 }

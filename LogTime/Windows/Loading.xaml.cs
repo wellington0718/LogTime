@@ -1,4 +1,5 @@
-﻿namespace LogTime.Windows;
+﻿
+namespace LogTime.Windows;
 
 public partial class Loading : Window
 {

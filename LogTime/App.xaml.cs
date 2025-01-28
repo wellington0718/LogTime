@@ -1,4 +1,6 @@
-﻿namespace LogTime;
+﻿using LogTime.Windows;
+
+namespace LogTime;
 
 public partial class App : Application
 {
@@ -24,7 +26,6 @@ public partial class App : Application
 
     public static void Restart()
     {
-
         try
         {
             var executablePath = Environment.ProcessPath;

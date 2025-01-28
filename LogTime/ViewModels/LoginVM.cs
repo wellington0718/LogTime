@@ -84,7 +84,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
                     logService.Log(logEntry);
 
                     var message = string.Format(Resource.OPEN_SESSION_MESSAGE, UserId, fetchSessionData.CurrentRemoteHost);
-                    var dialogResult = DialogBox.Show(message, Resource.OPEN_SESSION_TITLE, DialogBoxButton.YesNo, AlertType.Warning);
+                    var dialogResult = DialogBox.Show(message, Resource.OPEN_SESSION_TITLE, DialogBoxButton.YesNo, AlertType.Information);
 
                     if (dialogResult)
                     {

@@ -1,4 +1,6 @@
-﻿namespace LogTime.ViewModels;
+﻿using H.Hooks;
+
+namespace LogTime.ViewModels;
 
 public partial class MainVM : ObservableObject
 {
@@ -13,7 +15,7 @@ public partial class MainVM : ObservableObject
     [ObservableProperty]
     private int currentStatusIndex;
 
-    private readonly static DispatcherTimer generalTimer = new() { Interval = TimeSpan.FromSeconds(1)};
+    private readonly static DispatcherTimer generalTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly ILogService logService;
     private readonly ILogTimeApiClient logTimeApiClient;
     private readonly ILoadingService loadingService;
@@ -28,18 +30,32 @@ public partial class MainVM : ObservableObject
     private bool isPcLocked;
     private bool isScreenSaverRunning;
     private bool screenSaverLastState;
+    private int keyPressedCounter;
+    private H.Hooks.Key lastKeyPressed;
+    private const int keyPressThreshold = 5490;
     private bool canHandleStatusChange = true;
+    private bool isHookedkeyLogout;
+    private readonly LowLevelKeyboardHook keyboardHook;
 
     public SessionData SessionData { get; }
 
     public MainVM(ILogService logService, ILogTimeApiClient logTimeApiClient, ILoadingService loadingService)
     {
+        keyboardHook = new()
+        {
+            OneUpEvent = false
+        };
+
+        keyboardHook.Down += KeyboardHookHandler;
+        keyboardHook.Start();
+
         var loginDateTime = GlobalData.SessionData.LogHistory.LoginDate;
         this.logService = logService;
         this.logTimeApiClient = logTimeApiClient;
         this.loadingService = loadingService;
         SystemEvents.SessionSwitch += SystemEventsSessionSwitch;
         SystemEvents.SessionEnded += LoggingOff;
+        SystemEvents.PowerModeChanged += ChangingOperatingSystemMode;
         networkWasAlive = true;
         SessionData = GlobalData.SessionData;
         serverConnection = loginDateTime.ToString("yyyy-MM-dd HH:mm:ss");
@@ -48,14 +64,15 @@ public partial class MainVM : ObservableObject
         previousStatusId = currentStatusIndex;
         activityIdleTimeSeconds = SessionData.User.Project.Statuses.ToList()[currentStatusIndex].IdleTime * 60;
         logEntry = new LogEntry { ClassName = nameof(MainVM), UserId = SessionData.User?.Id, };
-        generalTimer.Start();
         generalTimer.Tick += GeneralTimerTick;
+        generalTimer.Start();
     }
 
     [DllImport("Sensapi")]
     private static extern bool IsNetworkAlive(out int flags);
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref bool pvParam, uint fWinIni);
+
 
     private bool IsScreenSaverRunning()
     {
@@ -128,6 +145,32 @@ public partial class MainVM : ObservableObject
     [RelayCommand]
     public void ShowLogFile() => logService.ShowLog(SessionData.User.Id);
 
+    public async void KeyboardHookHandler(object? sender, H.Hooks.KeyboardEventArgs args)
+    {
+        keyPressedCounter = args.CurrentKey == lastKeyPressed ? keyPressedCounter += 1 : 0;
+        lastKeyPressed = args.CurrentKey;
+
+        if (keyPressedCounter < keyPressThreshold) return;
+
+        logEntry.MethodName = nameof(KeyboardHookHandler);
+        logEntry.LogMessage = "A keyboard key got hooked. Proceeding to close session.";
+
+        logService.Log(logEntry);
+        isHookedkeyLogout = true;
+        keyPressedCounter = 0;
+        generalTimer.Stop();
+        keyboardHook.Dispose();
+
+        await HandleCloseSession();
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            DialogBox.Show($"La sesión fue cerrada por el uso repetido intenso de la tecla ({args.CurrentKey}).", "LogTime - tecla enganchada", alertType: AlertType.Information);
+            App.Restart();
+
+        });
+    }
+
     private void LoggingOff(object sender, SessionEndedEventArgs e)
     {
         logEntry.MethodName = nameof(LoggingOff);
@@ -137,6 +180,18 @@ public partial class MainVM : ObservableObject
         Thread.Yield();
 
         Application.Current.Shutdown();
+    }
+
+    private void ChangingOperatingSystemMode(object sender, PowerModeChangedEventArgs e)
+    {
+        //SaveStatusClassLog(
+        //    Resources.METHOD_POWER_MODE,
+        //    string.Format(Resources.LOG_POWER_MODE_CHANGE, e.Mode));
+
+        if (e.Mode == PowerModes.Suspend)
+        {
+            Application.Current.Shutdown();
+        }
     }
 
     private void SystemEventsSessionSwitch(object sender, SessionSwitchEventArgs e)
@@ -164,12 +219,12 @@ public partial class MainVM : ObservableObject
     }
 
     [RelayCommand]
-    public async Task CloseSession(string shutDown)
+    public async Task CloseSession(string shutDownAppArg)
     {
         try
         {
-            var isShutDown = !string.IsNullOrEmpty(shutDown);
-            var action = isShutDown ? "salir la aplicación" : "reiniciar la aplicación";
+            var isShutingDown = !string.IsNullOrEmpty(shutDownAppArg);
+            var action = isShutingDown ? "salir la aplicación" : "reiniciar la aplicación";
             var closeSessionConfirmation = DialogBox.Show(string.Format(Resource.CLOSE_SESSION_ACONFIRMATION, action),
                 Resource.CLOSE_SESSION_CONFIRMATION_TITLE, DialogBoxButton.YesNo, AlertType.Question);
 
@@ -177,7 +232,7 @@ public partial class MainVM : ObservableObject
 
             await HandleCloseSession();
 
-            if (!string.IsNullOrEmpty(shutDown))
+            if (isShutingDown)
                 Application.Current.Shutdown();
             else
                 App.Restart();
@@ -200,9 +255,10 @@ public partial class MainVM : ObservableObject
     {
         try
         {
+            logEntry.MethodName = nameof(GeneralTimerTick);
+
             if (!IsNetworkAlive(out _))
             {
-                logEntry.MethodName = nameof(GeneralTimerTick);
 
                 if (networkWasAlive)
                 {
@@ -216,7 +272,7 @@ public partial class MainVM : ObservableObject
                     if (sessionTimeSpan.TotalSeconds % 30 == 0)
                     {
                         loadingService.Show("El adaptador o cable de red estuvo desconectado por mucho tiempo. Reiniciando applicación.");
-                        logEntry.LogMessage = "The network adapter has been down for too long. Restarting app.";
+                        logEntry.LogMessage = "The network adapter has been down for too long.  App was restarted.";
                         App.Restart();
                         return;
                     }
@@ -262,7 +318,7 @@ public partial class MainVM : ObservableObject
 
                         if (!hasError)
                         {
-                            var result = DialogBox.Show("La sesión fue cerrada debido a que el tiempo de inactividad fue exedido", "LogTime - Tiempo de inactividad", alertType: AlertType.Information);
+                            DialogBox.Show("La sesión fue cerrada debido a que el tiempo de inactividad fue exedido", "LogTime - Tiempo de inactividad", alertType: AlertType.Information);
                             App.Restart();
                         }
                     }
@@ -307,7 +363,7 @@ public partial class MainVM : ObservableObject
 
     private async Task UpdateSessionAliveDateAsync(bool isRefreshing)
     {
-        
+
         if (sessionTimeSpan.Minutes % 1 == 0 && sessionTimeSpan.Seconds == 0 || isRefreshing)
         {
             if (isRefreshing)
@@ -363,27 +419,29 @@ public partial class MainVM : ObservableObject
     {
         loadingService.Show("Cerrando sesión, por favor espere...");
         logEntry.LogMessage = "Cerrando sesión.";
-        logEntry.MethodName = nameof(HandleCloseSession);
         logService.Log(logEntry);
 
         var sessionLogOutData = new SessionLogOutData
         {
             UserIds = SessionData.User.Id,
-            LoggedOutBy = CurrentStatusIndex == (int)SharedStatus.Lunch ? "Auto-logout: Lunch" : SessionData.User.Id
+            LoggedOutBy = CurrentStatusIndex == (int)SharedStatus.Lunch
+            ? "Auto-logout: Lunch"
+            : isHookedkeyLogout
+            ? "Auto-logout: Hooked key"
+            : SessionData.User.Id
         };
 
         var closeSessionResponse = await logTimeApiClient.CloseSessionAsync(sessionLogOutData);
 
         if (HandleResponseErrors(closeSessionResponse)) return;
 
+        loadingService.Close();
         logEntry.LogMessage = "Sesión cerrada.";
         logService.Log(logEntry);
     }
 
     private bool HandleResponseErrors(BaseResponse baseResponse)
     {
-        logEntry.MethodName = nameof(HandleCloseSession);
-
         if (baseResponse.IsSessionAlreadyClose)
         {
             logEntry.LogMessage = Resource.SESSION_ALREADY_CLOSED;
@@ -441,7 +499,7 @@ public partial class MainVM : ObservableObject
 
     internal static void HandleGeneralTimerTickOnRetry(bool isRetring)
     {
-        if(isRetring)
+        if (isRetring)
         {
             generalTimer?.Stop();
         }
