@@ -33,7 +33,7 @@ public partial class MainVM : ObservableObject
     private int keyPressedCounter;
     private H.Hooks.Key lastKeyPressed;
     private const int keyPressThreshold = 5490;
-    private bool canHandleStatusChange = true;
+    private bool isStatusChangeConfirmed = true;
     private bool isHookedkeyLogout;
     private readonly LowLevelKeyboardHook keyboardHook;
 
@@ -104,20 +104,20 @@ public partial class MainVM : ObservableObject
 
             if (IsEarlyBreakChange(selectedStatusIndex))
             {
-                canHandleStatusChange = ConfirmEarlyBreakChange();
+                isStatusChangeConfirmed = ConfirmEarlyBreakChange();
 
-                if (!canHandleStatusChange)
+                if (!isStatusChangeConfirmed)
                 {
                     RevertToPrevoiusStatus();
-                    canHandleStatusChange = false;
+                    isStatusChangeConfirmed = false;
                     return;
                 }
             }
 
             if (selectedStatusIndex == (int)SharedStatus.Lunch)
             {
-                canHandleStatusChange = ConfirmLunchChange();
-                if (!canHandleStatusChange)
+                isStatusChangeConfirmed = ConfirmLunchChange();
+                if (!isStatusChangeConfirmed)
                 {
                     RevertToPrevoiusStatus();
                     return;
@@ -126,7 +126,7 @@ public partial class MainVM : ObservableObject
                 await HandleLunchSessionClose(selectedStatus);
             }
 
-            if (canHandleStatusChange)
+            if (isStatusChangeConfirmed)
             {
                 await HandleStatusChange(selectedStatus, selectedStatusIndex);
             }
@@ -137,7 +137,7 @@ public partial class MainVM : ObservableObject
         }
         finally
         {
-            canHandleStatusChange = true;
+            isStatusChangeConfirmed = true;
         }
 
     }
