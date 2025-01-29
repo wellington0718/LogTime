@@ -56,9 +56,10 @@ public class LogService : ILogService
 
     private LogEntry ParseLogString(string logString)
     {
+        string[] parts;
         try
         {
-            var parts = logString.Split('|').Select(p => p.Trim()).ToArray();
+             parts = logString.Split('|').Select(p => p.Trim()).ToArray();
 
             return new LogEntry
             {
@@ -70,9 +71,8 @@ public class LogService : ILogService
             };
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-
             throw;
         }
     }

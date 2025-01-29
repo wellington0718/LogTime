@@ -154,7 +154,7 @@ public partial class LoginVM(ILogTimeApiClient logTimeApiClient, ILoadingService
             loadingService.Close();
             logEntry.LogMessage = exception.Message;
             logService.Log(logEntry);
-            ExceptionService.Handle(exception.Message);
+            ExceptionService.Handle(logEntry.LogMessage);
         }
     }
 

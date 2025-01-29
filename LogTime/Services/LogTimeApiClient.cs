@@ -19,14 +19,14 @@ public class LogTimeApiClient : ILogTimeApiClient
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        _httpClient.BaseAddress = CanConnectToServer(isLocalhost:false);
+        _httpClient.BaseAddress = GetLogApiServerAddress();
     }
 
-    private static Uri? CanConnectToServer(bool isLocalhost)
+    private static Uri? GetLogApiServerAddress()
     {
-        var hosts = _configuration?.GetSection("Host").Value?.Split(',');
+        var hosts = _configuration?.GetSection("WebHost").Value?.Split(',');
 
-        if (!isLocalhost && hosts?.Length > 0)
+        if (hosts?.Length > 0)
         {
             foreach (var host in hosts)
             {
@@ -40,22 +40,22 @@ public class LogTimeApiClient : ILogTimeApiClient
                         return new($"http://{host}:56848/logtime-3.0-api/api/");
                     }
                 }
-                catch (Exception){}
+                catch (Exception) { }
             }
+        }
 
-            return null;
-        }
-        else
-        {
-            return new("http://localhost:5208/api/");
-        }
+        return null;
     }
 
     private async Task<T> SendAsync<T>(string endpoint, object body) where T : new()
     {
         var content = JsonSerializer.Serialize(body, _jsonOptions);
         var sourceToken = new CancellationTokenSource();
-        LoadingService.CancellationTokenSource = sourceToken;
+
+        RetryService.OnCancelRetry += (s, v) =>
+        {
+            sourceToken.Cancel();
+        };
 
         var responseData = await RetryService.ExecuteWithRetryAsync(async () =>
         {
@@ -69,14 +69,14 @@ public class LogTimeApiClient : ILogTimeApiClient
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new HttpRequestException(responseDataString);
+                throw new HttpRequestException(responseDataString.Split(". ")[0]);
             }
 
             var responseData = JsonSerializer.Deserialize<T>(responseDataString, _jsonOptions) ?? new();
 
             return responseData;
 
-        }, retryCount: 2, retryDelay: 5, cancellationToken: sourceToken.Token);
+        }, retryCount: 1, retryDelay: 5, cancellationToken: sourceToken.Token);
 
         return responseData;
     }

@@ -1,9 +1,7 @@
 namespace LogTime.Services;
 public class RetryService
 {
-
     public static event EventHandler? OnCancelRetry;
-
 
     public static async Task<T> ExecuteWithRetryAsync<T>(
         Func<Task<T>> operation,
@@ -21,13 +19,13 @@ public class RetryService
             {
                 if (attempt == 1)
                 {
-                    MainVM.HandleGeneralTimerTickOnRetry(true);
+                    MainVM.StopGeneralTimerTickOnRetry(true);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 var response = await operation();
                 loadingService?.Close();
-                MainVM.HandleGeneralTimerTickOnRetry(false);
+                MainVM.StopGeneralTimerTickOnRetry(false);
                 return response;
             }
             catch (Exception)
@@ -38,8 +36,7 @@ public class RetryService
                 }
 
                 attempt++;
-                loadingService?.Show($"Ha ocurrido un error al precesar la solicitud. \n Iniciando reintento... Intento: {attempt}/{retryCount}");
-
+                loadingService?.Show($"Ha ocurrido un error al precesar la solicitud.\nIniciando reintento: ({attempt}/{retryCount})");
                 await Task.Delay(TimeSpan.FromSeconds(retryDelay), cancellationToken);
             }
 

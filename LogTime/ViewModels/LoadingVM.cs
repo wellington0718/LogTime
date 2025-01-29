@@ -8,6 +8,6 @@ public partial class LoadingVM : ObservableObject
     private bool isInteractionEnabled;
 
     [RelayCommand]
-    public void CancelRetry() => LoadingService.CancellationTokenSource?.Cancel();
+    public void CancelRetry() => RetryService.CancelRetry();
 
 }

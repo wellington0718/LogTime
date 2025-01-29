@@ -3,10 +3,9 @@
 public class LoadingService : ILoadingService
 {
     private Loading? _loading;
-    private Window? _ownerWindow;
-    private LoadingVM? LoadingVM;
-
-    public static CancellationTokenSource? CancellationTokenSource { get; set; }
+    private readonly Window? _ownerWindow;
+    private readonly LoadingVM? _loadingVM;
+    private UIElement? _windowMainUiElement;
 
     public static dynamic? ViewModel { get; set; }
 
@@ -37,8 +36,12 @@ public class LoadingService : ILoadingService
 
                 if (ViewModel != null)
                 {
-                    ViewModel.IsInteractionEnabled = true;
                     ViewModel = null;
+                }
+
+                if (_windowMainUiElement != null)
+                {
+                    _windowMainUiElement.IsEnabled = true;
                 }
             }
         });
@@ -61,23 +64,24 @@ public class LoadingService : ILoadingService
 
         if (_loading?.Owner != null)
         {
-            _ownerWindow = _loading.Owner;
+            _windowMainUiElement = _loading.Owner.FindName("WindowMainUiElement") as UIElement;
+
+            if (_windowMainUiElement != null)
+            {
+                _windowMainUiElement.IsEnabled = false;
+            }
+
             AttachOwnerHandlers();
         }
 
         _loading?.Show();
-
-        if (ViewModel != null)
-        {
-            ViewModel.IsInteractionEnabled = false;
-        }
 
         CenterLoadingWindow();
     }
 
     private void UpdateMessage(string message)
     {
-        if (message.Contains("Intento"))
+        if (message.Contains("reintento"))
         {
             _loading!.CancelBtn.Visibility = Visibility.Visible;
         }

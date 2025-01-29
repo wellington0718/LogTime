@@ -185,7 +185,7 @@ public partial class MainVM : ObservableObject
     private void ChangingOperatingSystemMode(object sender, PowerModeChangedEventArgs e)
     {
         logEntry.MethodName = nameof(ChangingOperatingSystemMode);
-        logEntry.LogMessage = string.Format("OS Power Mode changed: {0}.", e.Mode);
+        logEntry.LogMessage = string.Format("Shutdown app due to OS Power Mode changed to: {0}.", e.Mode);
         logService.Log(logEntry);
 
         if (e.Mode == PowerModes.Suspend)
@@ -497,7 +497,7 @@ public partial class MainVM : ObservableObject
         || activityTimeSpan.Minutes >= Constants.MinimumBreakDurationMinutes
         || selectedStatusIndex == (int)SharedStatus.Break);
 
-    internal static void HandleGeneralTimerTickOnRetry(bool isRetring)
+    internal static void StopGeneralTimerTickOnRetry(bool isRetring)
     {
         if (isRetring)
         {

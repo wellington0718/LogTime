@@ -37,6 +37,7 @@ if (app.Environment.IsDevelopment())
 
 }
 
+app.UsePathBase("/logtime-3.0-api");
 app.UseAuthorization();
 app.MapControllers();
 
