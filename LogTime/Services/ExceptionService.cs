@@ -22,7 +22,5 @@ public class ExceptionService
         {
             DialogBox.Show(Resource.UNKNOWN_ERROR, Resource.UNKNOWN_ERROR_TITLE, alertType: AlertType.Error);
         }
-
-      // App.Restart();
     }
 }

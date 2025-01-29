@@ -240,7 +240,6 @@ public partial class MainVM : ObservableObject
         catch (Exception exception)
         {
             HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
-            App.Restart();
         }
         finally
         {
@@ -477,6 +476,7 @@ public partial class MainVM : ObservableObject
         logEntry.MethodName += methodName;
         logService.Log(logEntry);
         ExceptionService.Handle(errorMessage);
+        App.Restart();
     }
 
     private void RevertToPrevoiusStatus() => CurrentStatusIndex = previousStatusId;
