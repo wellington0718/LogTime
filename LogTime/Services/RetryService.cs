@@ -19,13 +19,13 @@ public class RetryService
             {
                 if (attempt == 1)
                 {
-                    MainVM.StopGeneralTimerTickOnRetry(true);
+                    MainVM.HandleGeneralTimerTickOnRetry(true);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 var response = await operation();
                 loadingService?.Close();
-                MainVM.StopGeneralTimerTickOnRetry(false);
+                MainVM.HandleGeneralTimerTickOnRetry(false);
                 return response;
             }
             catch (Exception)

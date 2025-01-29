@@ -35,7 +35,13 @@ public partial class MainVM : ObservableObject
     private const int keyPressThreshold = 5490;
     private bool isStatusChangeConfirmed = true;
     private bool isHookedkeyLogout;
+
     private readonly LowLevelKeyboardHook keyboardHook;
+    [DllImport("Sensapi")]
+    private static extern bool IsNetworkAlive(out int flags);
+    [DllImport("user32.dll", SetLastError = true)]
+
+    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref bool pvParam, uint fWinIni);
 
     public SessionData SessionData { get; }
 
@@ -68,12 +74,6 @@ public partial class MainVM : ObservableObject
         generalTimer.Start();
     }
 
-    [DllImport("Sensapi")]
-    private static extern bool IsNetworkAlive(out int flags);
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref bool pvParam, uint fWinIni);
-
-
     private bool IsScreenSaverRunning()
     {
         SystemParametersInfo(Constants.SPI_GETSCREENSAVERRUNNING, 0, ref isScreenSaverRunning, 0);
@@ -104,7 +104,7 @@ public partial class MainVM : ObservableObject
 
             if (IsEarlyBreakChange(selectedStatusIndex))
             {
-                isStatusChangeConfirmed = ConfirmEarlyBreakChange();
+                isStatusChangeConfirmed = ConfirmStatusChange(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE);
 
                 if (!isStatusChangeConfirmed)
                 {
@@ -116,7 +116,7 @@ public partial class MainVM : ObservableObject
 
             if (selectedStatusIndex == (int)SharedStatus.Lunch)
             {
-                isStatusChangeConfirmed = ConfirmLunchChange();
+                isStatusChangeConfirmed = ConfirmStatusChange(Resource.LUNCH_CONFIRMATION, "LogTime - Lunch");
                 if (!isStatusChangeConfirmed)
                 {
                     RevertToPrevoiusStatus();
@@ -144,6 +144,38 @@ public partial class MainVM : ObservableObject
 
     [RelayCommand]
     public void ShowLogFile() => logService.ShowLog(SessionData.User.Id);
+
+    [RelayCommand]
+    public async Task CloseSession(string shutDownAppArg)
+    {
+        try
+        {
+            var isShutingDown = !string.IsNullOrEmpty(shutDownAppArg);
+            var action = isShutingDown ? "salir la aplicación" : "reiniciar la aplicación";
+            var closeSessionConfirmation = DialogBox.Show(string.Format(Resource.CLOSE_SESSION_ACONFIRMATION, action),
+                Resource.CLOSE_SESSION_CONFIRMATION_TITLE, DialogBoxButton.YesNo, AlertType.Question);
+
+            if (!closeSessionConfirmation) return;
+
+            await HandleCloseSession();
+
+            if (isShutingDown)
+                Application.Current.Shutdown();
+            else
+                App.Restart();
+        }
+        catch (Exception exception)
+        {
+            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
+        }
+        finally
+        {
+            loadingService.Close();
+        }
+    }
+
+    [RelayCommand]
+    public async Task RefreshServerConnection() => await UpdateSessionAliveDateAsync(true);
 
     public async void KeyboardHookHandler(object? sender, H.Hooks.KeyboardEventArgs args)
     {
@@ -217,38 +249,6 @@ public partial class MainVM : ObservableObject
 
         logService.Log(logEntry);
     }
-
-    [RelayCommand]
-    public async Task CloseSession(string shutDownAppArg)
-    {
-        try
-        {
-            var isShutingDown = !string.IsNullOrEmpty(shutDownAppArg);
-            var action = isShutingDown ? "salir la aplicación" : "reiniciar la aplicación";
-            var closeSessionConfirmation = DialogBox.Show(string.Format(Resource.CLOSE_SESSION_ACONFIRMATION, action),
-                Resource.CLOSE_SESSION_CONFIRMATION_TITLE, DialogBoxButton.YesNo, AlertType.Question);
-
-            if (!closeSessionConfirmation) return;
-
-            await HandleCloseSession();
-
-            if (isShutingDown)
-                Application.Current.Shutdown();
-            else
-                App.Restart();
-        }
-        catch (Exception exception)
-        {
-            HandleException(exception.GetBaseException().Message, nameof(HandleStatusChange));
-        }
-        finally
-        {
-            loadingService.Close();
-        }
-    }
-
-    [RelayCommand]
-    public async Task RefreshServerConnection() => await UpdateSessionAliveDateAsync(true);
 
     private async void GeneralTimerTick(object? sender, EventArgs e)
     {
@@ -481,11 +481,8 @@ public partial class MainVM : ObservableObject
 
     private void RevertToPrevoiusStatus() => CurrentStatusIndex = previousStatusId;
 
-    private static bool ConfirmEarlyBreakChange() =>
-         DialogBox.Show(Resource.EARLY_BREAK_CHANGE, Resource.EARLY_BREAK_TITLE, DialogBoxButton.YesNo);
-
-    private static bool ConfirmLunchChange() =>
-         DialogBox.Show(Resource.LUNCH_CONFIRMATION, "LogTime - Cierre de sesión", DialogBoxButton.YesNo, AlertType.Question);
+    private static bool ConfirmStatusChange(string message, string title) =>
+         DialogBox.Show(message, title, DialogBoxButton.YesNo, AlertType.Question);
 
     private async Task HandleLunchSessionClose(Status selectedStatus)
     {
@@ -493,13 +490,14 @@ public partial class MainVM : ObservableObject
         await HandleCloseSession();
         Application.Current.Shutdown();
     }
+   
     private bool IsEarlyBreakChange(int selectedStatusIndex) => !(previousStatusId != (int)SharedStatus.Break
         || activityTimeSpan.Minutes >= Constants.MinimumBreakDurationMinutes
         || selectedStatusIndex == (int)SharedStatus.Break);
 
-    internal static void StopGeneralTimerTickOnRetry(bool isRetring)
+    internal static void HandleGeneralTimerTickOnRetry(bool isRetrying)
     {
-        if (isRetring)
+        if (isRetrying)
         {
             generalTimer?.Stop();
         }
