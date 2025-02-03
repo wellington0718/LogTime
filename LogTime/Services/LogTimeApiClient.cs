@@ -76,7 +76,7 @@ public class LogTimeApiClient : ILogTimeApiClient
 
             return responseData;
 
-        }, retryCount: 1, retryDelay: 5, cancellationToken: sourceToken.Token);
+        }, retryCount: 10, retryDelay: 5, cancellationToken: sourceToken.Token);
 
         return responseData;
     }
