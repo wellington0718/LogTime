@@ -10,7 +10,7 @@ namespace Domain.Models
         [NotMapped]
         public string FullName => $"{FirstName.Split(' ')[0]} {LastName.Split(' ')[0]}";
         [NotMapped]
-        public string Initials => $"{FirstName[..1]} {LastName[..1]}";
+        public string Initials => $"{FirstName[..1]}{LastName[..1]}";
         [NotMapped]
         public int RoleId { get; set; }
         [NotMapped]
