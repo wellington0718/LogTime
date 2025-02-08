@@ -13,16 +13,26 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
     public async Task<BaseResponse> CloseActiveSessionsAsync(string loggedOutBy, string userIds)
     {
         var userIdsList = string.IsNullOrEmpty(userIds) ? [] : userIds.Split(',').ToList();
+        List<LogHistory> logHistories;
 
         var logHistoryIdsByActiveLogs = ActiveLogRepository.GetQueryable()
                                        .Where(activeLog => userIdsList.Contains(activeLog.UserId))
                                        .Select(activeLog => activeLog.ActualLogHistoryId);
 
-        var logHistories = LogHistoryRepository.GetQueryable()
+        if(!logHistoryIdsByActiveLogs.Any())
+        {
+            logHistories = [.. LogHistoryRepository.GetQueryable()
+                                   .Where(logHistory => userIdsList.Contains(logHistory.IdUser) && logHistory.LogoutDate == null)
+                                   .Include(log => log.ActiveLogs)
+                                   .Include(log => log.StatusHistories)];
+        }
+        else
+        {
+            logHistories = [.. LogHistoryRepository.GetQueryable()
                                    .Where(logHistory => logHistoryIdsByActiveLogs.Contains(logHistory.Id))
                                    .Include(log => log.ActiveLogs)
-                                   .Include(log => log.StatusHistories)
-                                   .ToList();
+                                   .Include(log => log.StatusHistories)];
+        }
 
         if (logHistories.Any(l => l.LogoutDate.HasValue))
         {
@@ -33,6 +43,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
             });
 
             await SaveChangesAsync();
+          
             return new BaseResponse
             {
                 Code = StatusCodes.Status200OK,
@@ -50,8 +61,12 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
             logHistory.LastTimeConnectionAlive = logoutDate;
             logHistory.LogedOutBy = string.IsNullOrEmpty(loggedOutBy) ? "New session" : loggedOutBy;
 
-            foreach (var statusHistory in logHistory.StatusHistories)
+            var statusHistories = logHistory.StatusHistories.Where(statusHistory => statusHistory.StatusEndTime == null);
+
+            foreach (var statusHistory in statusHistories)
+            {
                 statusHistory.StatusEndTime = logoutDate;
+            }
 
             StatusHistoryRepository.UpdateRange(logHistory.StatusHistories);
             ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
@@ -59,7 +74,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
 
         LogHistoryRepository.UpdateRange(logHistories);
         await SaveChangesAsync();
-        await CommitAsync();
 
         return new BaseResponse
         {
@@ -77,7 +91,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         {
             ActiveLogRepository.DeleteAsync(logHistory.ActiveLogs);
             await SaveChangesAsync();
-            await CommitAsync();
 
             return new BaseResponse
             {
@@ -91,7 +104,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         logHistory.LastTimeConnectionAlive = DateTime.Now;
         LogHistoryRepository.Update(logHistory);
         await SaveChangesAsync();
-        await CommitAsync();
 
         return new SessionAliveDate { LastDate = logHistory.LastTimeConnectionAlive };
     }
@@ -111,7 +123,7 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
     {
         var currentStatusHistory = await StatusHistoryRepository.FindAsync(currentStatusHistoryId);
         var currentActiveLog = await ActiveLogRepository.FindAsync(activeLog => activeLog.ActualStatusHistoryId == currentStatusHistory.Id);
-
+       
         if (currentActiveLog == null)
         {
             return new BaseResponse
@@ -128,7 +140,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         {
             await ActiveLogRepository.DeleteAsync(currentActiveLog);
             await SaveChangesAsync();
-            await CommitAsync();
 
             return new BaseResponse
             {
@@ -144,7 +155,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         currentStatusHistory.StatusEndTime = currentDateTime;
         LogHistoryRepository.Update(logHistory);
         StatusHistoryRepository.Update(currentStatusHistory);
-
         await SaveChangesAsync();
 
         var newStatusHistory = new StatusHistory
@@ -161,7 +171,6 @@ public class LogTimeUnitOfWork(LogTimeDataContext dataContext, IServiceProvider 
         ActiveLogRepository.Update(currentActiveLog);
 
         await SaveChangesAsync();
-        await CommitAsync();
 
         var newStatusHistoryChange = new StatusHistoryChange
         {

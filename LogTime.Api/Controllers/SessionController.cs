@@ -30,6 +30,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
         try
         {
             var baseResponse = await logTimeUnitOfWork.CloseActiveSessionsAsync(sessionLogOutData.LoggedOutBy, sessionLogOutData.UserIds);
+            await logTimeUnitOfWork.CommitAsync();
             return CreateResponse(baseResponse);
         }
         catch (Exception ex)
@@ -44,6 +45,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
         try
         {
             var updateLogHistoryResponse = await logTimeUnitOfWork.UpdateLogHistoyAsync(logHistoryId);
+            await logTimeUnitOfWork.CommitAsync();
             return CreateResponse(updateLogHistoryResponse);
         }
         catch (Exception ex)
@@ -58,6 +60,7 @@ public class SessionController(ILogTimeUnitOfWork logTimeUnitOfWork) : ApiContro
         try
         {
             var fetchActiveSessionResponse = await logTimeUnitOfWork.FetchActiveSessionAsync(userId);
+            await logTimeUnitOfWork.CommitAsync();
             return CreateResponse(fetchActiveSessionResponse);
 
         }

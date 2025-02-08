@@ -12,6 +12,7 @@ namespace LogTime.Api.Controllers
             try
             {
                 var changeStatusResponse = await logTimeUnitOfWork.ChangeStatusAsync(statusHistoryChange.NewActivityId, statusHistoryChange.Id);
+                await logTimeUnitOfWork.CommitAsync();
                 return CreateResponse(changeStatusResponse);
             }
             catch (Exception ex)

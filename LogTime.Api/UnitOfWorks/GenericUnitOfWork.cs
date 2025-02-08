@@ -7,6 +7,7 @@ public abstract class GenericUnitOfWork(LogTimeDataContext context) : IGenericUn
     public async Task<bool> SaveChangesAsync()
     {
         var result = await context.SaveChangesAsync();
+
         return result > 0;
     }
 
