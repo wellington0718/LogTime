@@ -1,6 +1,4 @@
-﻿using LogTime.Windows;
-
-namespace LogTime;
+﻿namespace LogTime;
 
 public partial class App : Application
 {
